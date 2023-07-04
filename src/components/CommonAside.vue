@@ -4,11 +4,12 @@
              @open="handleOpen"
              @close="handleClose"
              :collapse="isCollapse"
+             :router="isRouter"
              background-color="#545c64"
              text-color="#fff"
              active-text-color="#ffd04b">
-        <h3> 通用后台管理 </h3>
-        <el-menu-item v-for="item in noChildren" :key="item.name" :index="item.name">
+        <h3> {{isCollapse? '后台':'通用后台管理'}}</h3>
+        <el-menu-item @click="clickMenu(item)" v-for="item in noChildren" :key="item.name" :index="item.path">
             <i :class="`el-icon-${item.icon}`"></i>
             <span slot="title">{{ item.label }}</span>
         </el-menu-item>
@@ -18,7 +19,7 @@
                 <span slot="title">{{ item.label }}</span>
             </template>
             <el-menu-item-group v-for="subItem in item.children" :key="subItem.path">
-                <el-menu-item index="subItem.path">{{ subItem.label }}</el-menu-item>
+                <el-menu-item @click="clickMenu(subItem)" :index="subItem.path">{{ subItem.label }}</el-menu-item>
             </el-menu-item-group>
         </el-submenu>
 
@@ -33,8 +34,10 @@
     width: 200px;
     min-height: 400px;
 }
+
 .el-menu {
     height: 100vh;
+
     h3 {
         color: white;
         text-align: center;
@@ -50,7 +53,7 @@ export default {
     name: "CommonAside",
     data() {
         return {
-            isCollapse: false,
+            isRouter: true,
             menuData: [
                 {
                     path: '/',
@@ -102,6 +105,10 @@ export default {
         },
         handleClose(key, keyPath) {
             console.log(key, keyPath);
+        },
+        clickMenu(item) {
+            //更新面包屑
+            this.$store.commit('selectMenu',item)
         }
     },
     computed: {
@@ -112,8 +119,16 @@ export default {
         //有子菜单
         hasChildren() {
             return this.menuData.filter(item => item.children)
+        },
+        isCollapse(){
+            return this.$store.state.tab.isCollapse
         }
     }
 }
 </script>
+<style lang="less" scoped>
+.el-menu{
+    border-right: 0 ;
+}
+</style>
 

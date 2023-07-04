@@ -1,13 +1,14 @@
 <template>
     <div>
-
-
         <el-container>
-            <el-aside width="200px">
+            <el-aside width="auto">
                 <common-aside/>
             </el-aside>
             <el-container>
-                <el-header>Header</el-header>
+                <el-header>
+                    <common-header/>
+                </el-header>
+                <common-tag/>
                 <el-main>
 
                     <!--  路由出口-->
@@ -20,9 +21,14 @@
 </template>
 <script>
 import CommonAside from "@/components/CommonAside.vue";
-
+import CommonHeader from "@/components/CommonHeader.vue";
+import CommonTag from "@/components/CommonTag.vue";
 export default {
-    components: {CommonAside},
+    components: {
+        CommonAside,
+        CommonHeader,
+        CommonTag,
+    },
     data() {
         return {}
     },
@@ -31,3 +37,8 @@ export default {
     }
 }
 </script>
+<style scoped>
+.el-header{
+    padding: 0;
+}
+</style>
