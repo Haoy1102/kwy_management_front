@@ -8,7 +8,7 @@
              background-color="#545c64"
              text-color="#fff"
              active-text-color="#ffd04b">
-        <h3> {{isCollapse? '后台':'通用后台管理'}}</h3>
+        <h3> {{ isCollapse ? '后台' : '通用后台管理' }}</h3>
         <el-menu-item @click="clickMenu(item)" v-for="item in noChildren" :key="item.name" :index="item.path">
             <i :class="`el-icon-${item.icon}`"></i>
             <span slot="title">{{ item.label }}</span>
@@ -49,54 +49,12 @@
 </style>
 
 <script>
+import Cookie from "js-cookie";
 export default {
     name: "CommonAside",
     data() {
         return {
             isRouter: true,
-            menuData: [
-                {
-                    path: '/',
-                    name: 'home',
-                    label: '首页',
-                    icon: 's-home',
-                    url: 'Home/Home'
-                },
-                {
-                    path: '/mall',
-                    name: 'mall',
-                    label: '商品管理',
-                    icon: 'video-play',
-                    url: 'MallManage/MallManage'
-                },
-                {
-                    path: '/user',
-                    name: 'user',
-                    label: '用户管理',
-                    icon: 'user',
-                    url: 'UserManage/UserManage'
-                },
-                {
-                    label: '其他',
-                    icon: 'location',
-                    children: [
-                        {
-                            path: '/page1',
-                            name: 'page1',
-                            label: '页面1',
-                            icon: 'setting',
-                            url: 'Other/PageOne'
-                        },
-                        {
-                            path: '/page2',
-                            name: 'page2',
-                            label: '页面2',
-                            icon: 'setting',
-                            url: 'Other/PageTwo'
-                        }
-                    ]
-                }
-            ]
         };
     },
     methods: {
@@ -108,7 +66,7 @@ export default {
         },
         clickMenu(item) {
             //更新面包屑
-            this.$store.commit('selectMenu',item)
+            this.$store.commit('selectMenu', item)
         }
     },
     computed: {
@@ -120,15 +78,18 @@ export default {
         hasChildren() {
             return this.menuData.filter(item => item.children)
         },
-        isCollapse(){
+        isCollapse() {
             return this.$store.state.tab.isCollapse
+        },
+        menuData() {
+            return JSON.parse(Cookie.get('menu')) || this.$store.state.tab.menu
         }
     }
 }
 </script>
 <style lang="less" scoped>
-.el-menu{
-    border-right: 0 ;
+.el-menu {
+    border-right: 0;
 }
 </style>
 

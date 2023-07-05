@@ -8,13 +8,13 @@
             </el-breadcrumb>
         </div>
         <div class="r-content">
-            <el-dropdown>
+            <el-dropdown @command="handleClick">
                 <span class="el-dropdown-link">
                     <img class="user" src="../assets/img/logo.png" alt="">
                 </span>
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item>个人中心</el-dropdown-item>
-                    <el-dropdown-item>退出</el-dropdown-item>
+                    <el-dropdown-item command="logout">退出</el-dropdown-item>
 
                 </el-dropdown-menu>
             </el-dropdown>
@@ -24,13 +24,22 @@
 
 <script>
 import {mapState} from "vuex";
+import Cookie from "js-cookie";
 
 export default {
     name: "CommonHeader",
     methods: {
         handleMenu() {
             this.$store.commit('collapseMenu')
-        }
+        },
+        handleClick(command){
+            //登出按钮
+            if (command==='logout'){
+                Cookie.remove('token')
+                Cookie.remove('menu')
+                this.$router.push('login')
+            }
+        },
     },
     computed: {
         ...mapState({
