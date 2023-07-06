@@ -10,8 +10,8 @@
         <el-form-item label="用户名" prop="username">
             <el-input v-model="form.username" placeholder="请输入账号"></el-input>
         </el-form-item>
-        <el-form-item label="密码" prop="pwd">
-            <el-input type="password" v-model="form.pwd" placeholder="请输入密码"></el-input>
+        <el-form-item label="密码" prop="password">
+            <el-input type="password" v-model="form.password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item>
             <el-button @click="submit" style="margin-left: 105px;margin-top: 10px;" type="primary">登录</el-button>
@@ -22,7 +22,7 @@
 <script>
 import Mock from "mockjs";
 import Cookie from 'js-cookie'
-import {getMenu} from "@/api";
+import {login} from "@/api";
 
 export default {
     name: "Login",
@@ -30,13 +30,13 @@ export default {
         return {
             form: {
                 username: '',
-                pwd: ''
+                password: ''
             },
             rules: {
                 username: [{
                     required: true, trigger: 'blur', message: '请输入用户名'
                 }],
-                pwd: [{
+                password: [{
                     required: true, trigger: 'blur', message: '请输入密码'
                 }]
             }
@@ -52,19 +52,19 @@ export default {
             // 校验通过
             this.$refs.form.validate((valid) => {
                 if (valid) {
-                    getMenu(this.form).then(({data}) => {
+                    login(this.form).then(({data}) => {
                         console.log(data)
-                        if (data.code === 20000) {
+                        if (data.code === 0) {
                             // token信息存入cookie用于不同页面间的通信
-                            Cookie.set('token', data.data.token)
+                            Cookie.set('token', data.data)
 
                             // 获取菜单的数据，存入store中
-                            this.$store.commit('setMenu', data.data.menu)
-                            this.$store.commit('addMenu', this.$router)
+                            // this.$store.commit('setMenu', data.data.menu)
+                            // this.$store.commit('addMenu', this.$router)
                             // 跳转到首页
                             this.$router.push('/home')
                         } else {
-                            this.$message.error(data.data.message);
+                            this.$message.error(data.message);
                         }
                     })
                 }

@@ -1,5 +1,6 @@
 <template>
     <el-row>
+        <el-button @click="test">测试</el-button>
         <el-col :span="8" style="padding-right: 10px">
             <el-card class="box-card">
                 <div class="user">
@@ -36,7 +37,6 @@
                     <!--                    </el-table-column>-->
                     <el-table-column v-for="(val,key) in tableLable" :key="key" :prop="key" :label="val"/>
                 </el-table>
-
             </el-card>
         </el-col>
         <el-col :span="16" style="padding-left: 10px">
@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import {getData} from "@/api";
+import {getData, test} from "@/api";
 
 export default {
     name: "Home",
@@ -127,6 +127,13 @@ export default {
             console.log(tableData)
             this.tableData = tableData
         })
+    },
+    methods:{
+        test(){
+            test().then(({data})=>{
+                console.log(data.data)
+            })
+        }
     }
 }
 </script>

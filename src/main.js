@@ -7,6 +7,14 @@ import store from "@/store";
 import './api/mock'
 import Cookie from "js-cookie";
 
+
+// import {Axios} from "axios";
+//
+// // 设置全局的axios
+// Vue.prototype.$axios=Axios
+// // 设置基本路径
+// Axios.defaults.baseURL='/api'
+
 Vue.config.productionTip = false
 Vue.use(ElementUI);
 

@@ -49,12 +49,55 @@
 </style>
 
 <script>
-import Cookie from "js-cookie";
+// import Cookie from "js-cookie";
 export default {
     name: "CommonAside",
     data() {
         return {
             isRouter: true,
+            menuData: [
+                {
+                    path: '/home',
+                    name: 'home',
+                    label: '首页',
+                    icon: 's-home',
+                    url: 'Home.vue'
+                },
+                {
+                    path: '/mall',
+                    name: 'mall',
+                    label: '商品管理',
+                    icon: 'video-play',
+                    url: 'Mall.vue'
+                },
+                {
+                    path: '/user',
+                    name: 'user',
+                    label: '用户管理',
+                    icon: 'user',
+                    url: 'User.vue'
+                },
+                {
+                    label: '其他',
+                    icon: 'location',
+                    children: [
+                        {
+                            path: '/page1',
+                            name: 'page1',
+                            label: '页面1',
+                            icon: 'setting',
+                            url: 'PageOne.vue'
+                        },
+                        {
+                            path: '/page2',
+                            name: 'page2',
+                            label: '页面2',
+                            icon: 'setting',
+                            url: 'PageTwo.vue'
+                        }
+                    ]
+                }
+            ],
         };
     },
     methods: {
@@ -72,6 +115,7 @@ export default {
     computed: {
         //没有子菜单
         noChildren() {
+            // console.log(this.menuData.filter(item => !item.children),'noChildren')
             return this.menuData.filter(item => !item.children)
         },
         //有子菜单
@@ -81,9 +125,11 @@ export default {
         isCollapse() {
             return this.$store.state.tab.isCollapse
         },
-        menuData() {
-            return JSON.parse(Cookie.get('menu')) || this.$store.state.tab.menu
-        }
+        // menuData() {
+        //     // console.log(JSON.parse(Cookie.get('menu')),'menuData')
+        //     // console.log(this.$store.state.tab.menu,'this.$store.state.tab.menu')
+        //     return JSON.parse(Cookie.get('menu')) || this.$store.state.tab.menu
+        // }
     }
 }
 </script>
