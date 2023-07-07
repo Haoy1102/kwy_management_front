@@ -59,7 +59,7 @@ export default {
                 {
                     path: '/home',
                     name: 'home',
-                    label: '首页',
+                    label: '首页-账务',
                     icon: 's-home',
                     url: 'Home.vue'
                 },
@@ -76,6 +76,62 @@ export default {
                     label: '用户管理',
                     icon: 'user',
                     url: 'User.vue'
+                },
+
+                {
+                    path: '/customer',
+                    name: 'customer',
+                    label: '客户信息',
+                    icon: 's-custom',
+                    url: 'Customer.vue'
+                },
+                {
+                    path: '/order',
+                    name: 'order',
+                    label: '订单管理',
+                    icon: 's-order',
+                    url: 'Order.vue'
+                },
+                {
+                    label: '原料管理',
+                    icon: 'box',
+                    children: [
+                        {
+                            path: '/material_overview',
+                            name: 'material_overview',
+                            label: '材料总览',
+                            icon: 'view',
+                            url: 'MaterialOverview.vue'
+                        },
+                        {
+                            path: '/material_info',
+                            name: 'material_info',
+                            label: '原料信息',
+                            icon: 'info',
+                            url: 'MaterialInfo.vue'
+                        },
+                        {
+                            path: '/purchase',
+                            name: 'purchase',
+                            label: '采购',
+                            icon: 'shopping-cart-2',
+                            url: 'Purchase.vue'
+                        },
+                        {
+                            path: '/goods_management',
+                            name: 'goods_management',
+                            label: '库存管理',
+                            icon: 'box',
+                            url: 'GoodsManagement.vue'
+                        },
+                        {
+                            path: '/goods_record',
+                            name: 'goods_record',
+                            label: '库存记录',
+                            icon: 'document',
+                            url: 'GoodsRecord.vue'
+                        }
+                    ]
                 },
                 {
                     label: '其他',
