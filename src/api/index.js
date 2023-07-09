@@ -26,3 +26,11 @@ export const login=(data)=>{
 export const test=()=>{
     return http.post('/employee/test')
 }
+
+//customer
+export const addCustomer=(data)=>{
+    return http.post('/customers',data)
+}
+export const getCustomer=(params)=>{
+    return http.get('/customers',params)
+}
