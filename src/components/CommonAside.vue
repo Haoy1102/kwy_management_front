@@ -106,14 +106,14 @@ export default {
                         {
                             path: '/material_info',
                             name: 'material_info',
-                            label: '原料信息',
+                            label: '原料管理',
                             icon: 'info',
                             url: 'MaterialInfo.vue'
                         },
                         {
                             path: '/purchase',
                             name: 'purchase',
-                            label: '采购',
+                            label: '采购记录',
                             icon: 'shopping-cart-2',
                             url: 'Purchase.vue'
                         },

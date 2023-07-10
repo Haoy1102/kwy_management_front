@@ -299,12 +299,10 @@ export default {
         handleCloseForAdd() {
             this.$refs.addForm.resetFields()
             this.addDialogVisible = false
-            this.$message.info("当前操作取消")
         },
         //编辑弹窗关闭
         handleCloseForEdit() {
             this.editDialogVisible = false
-            this.$message.info("当前操作取消")
         },
         //删除按钮点击事件
         handleDelete(index, row) {
@@ -330,8 +328,7 @@ export default {
         },
         //获取页面
         getPage() {
-            http.get(`/customers/${this.pageData.currentPage}/${this.pageData.pageSize}
-            /?customer=${this.pageData.customer}&address=${this.pageData.address}`).then(({data}) => {
+            http.get(`/customers/${this.pageData.currentPage}/${this.pageData.pageSize}/?customer=${this.pageData.customer}&address=${this.pageData.address}`).then(({data}) => {
                     if (!data.code) {
                         this.tableData = data.data.records
                         this.pageData.total = data.data.total
