@@ -190,9 +190,9 @@
                             </el-form-item>
                             <el-form-item label="采购记录-(只显示最多十条，详细内容请至采购模块查询)">
                                 <el-table
-                                    height="90%"
-                                    :data="tableData4Purchase"
-                                    style="width: 100%">
+                                    :data="expandedRows[props.row.id]"
+                                    style="width: 100%"
+                                    >
                                     <el-table-column
                                         prop="id"
                                         label="货号ID">
@@ -225,7 +225,6 @@
                                     </el-table-column>
                                 </el-table>
                             </el-form-item>
-
                         </el-form>
                     </template>
                 </el-table-column>
@@ -295,6 +294,7 @@ export default {
             purchaseDialogVisible: false,
             tableData: [],
             tableData4Purchase: [{}, {}, {}, {}, {}, {}, {}, {}],
+            expandedRows: {},
             options4Status: [
                 {
                     label: "新鲜",
@@ -354,12 +354,6 @@ export default {
                     {required: true, message: '请输入供货商名'}
                 ],
                 number: [
-                    {required: true, message: '请输入供货商名'}
-                ],
-                price: [
-                    {required: true, message: '请输入供货商名'}
-                ],
-                totalAmount: [
                     {required: true, message: '请输入供货商名'}
                 ],
             },
@@ -537,11 +531,11 @@ export default {
                         if (record.price !== null) {
                             record.price = record.price.toFixed(2)
                         }
-                        if (record.latestPrice !== null) {
+                        if (record.totalAmount !== null) {
                             record.totalAmount = record.totalAmount.toFixed(2)
                         }
                     })
-                    this.tableData4Purchase = data.data.records
+                    this.$set(this.expandedRows, materialInfoId, data.data.records)
                 }
             })
         }
@@ -612,9 +606,10 @@ export default {
         }
 
         .demo-table-expand .el-form-item {
-            margin-right: 0;
+            margin-left: 5%;
+            margin-right: 5%;
             margin-bottom: 0;
-            width: 50%;
+            width: 90%;
         }
 
         .pager {
@@ -623,7 +618,6 @@ export default {
             right: 20px;
         }
     }
-
 }
 
 </style>

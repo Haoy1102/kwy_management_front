@@ -1,5 +1,4 @@
 <template>
-
     <div class="manage">
         <el-dialog
             title="采购"
@@ -50,7 +49,6 @@
                 height="90%"
                 :data="tableData"
                 style="width: 100%"
-                @expand-change="handleExpandChange"
             >
                 <el-table-column
                     prop="id"

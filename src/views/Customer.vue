@@ -106,39 +106,89 @@
                 stripe
                 height="90%"
                 :data="tableData"
-                style="width: 100%">
+                style="width: 100%"
+                @expand-change="handleExpandChange">
                 <el-table-column type="expand">
                     <template slot-scope="props">
-                        <el-form label-position="left" inline class="demo-table-expand">
-                            <el-form-item label="客户名称">
-                                <span>{{ props.row.customer }}</span>
-                            </el-form-item>
-                            <el-form-item label="联系人 ">
-                                <span>{{ props.row.people }}</span>
-                            </el-form-item>
-                            <el-form-item label="联系电话">
-                                <span>{{ props.row.phone }}</span>
-                            </el-form-item>
-                            <el-form-item label="备用电话">
-                                <span>{{ props.row.phoneStandby }}</span>
-                            </el-form-item>
-                            <el-form-item label="地址信息">
-                                <span>{{ props.row.address }}</span>
-                            </el-form-item>
-                            <el-form-item label="年总成交额">
-                                <span>{{ props.row.totalAmountPerYear }}</span>
+                        <el-form label-position="left"
+                                 :model="customerDetails[props.$index]"
+                                 class="demo-table-expand">
+                            <el-form-item label="年总成交额" prop="totalAmountPerYear">
+                                <span>¥ {{ customerDetails[props.$index].totalAmountPerYear }}</span>
                             </el-form-item>
                             <el-form-item label="现存订单额">
-                                <span>{{ props.row.totalAmountCurrent }}</span>
+                                <span>¥ {{ customerDetails[props.$index].totalAmountCurrent }}</span>
                             </el-form-item>
                             <el-form-item label="已出货额">
-                                <span>{{ props.row.totalAmountDelivered }}</span>
+                                <span>¥ {{ customerDetails[props.$index].totalAmountDelivered }}</span>
                             </el-form-item>
-                            <el-form-item label="欠缴">
-                                <span>{{ props.row.totalAmountDebt }}</span>
+                            <el-form-item label="欠款额度">
+                                <span>¥ {{ customerDetails[props.$index].totalAmountDebt4Completed }}</span>
+                            </el-form-item>
+                            <el-form-item label="总待支付金额">
+                                <span>¥ {{ customerDetails[props.$index].totalAmountDebt }}</span>
                             </el-form-item>
                             <el-form-item label="备注">
                                 <span>{{ props.row.note }}</span>
+                            </el-form-item>
+
+                            <el-form-item label="订单记录记录-(只显示一年记录，详细内容请至订单模块)">
+                                <el-table
+                                    :data="expandedRows[props.row.id]"
+                                    style="width: 100%"
+                                >
+                                    <el-table-column
+                                        prop="orderId"
+                                        label="订单号">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="content"
+                                        label="订单内容">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="people"
+                                        label="联系人"
+                                        width="70">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="createDate"
+                                        label="日期"
+                                        width="130">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="status"
+                                        label="状态"
+                                        width="90">
+                                        <template slot-scope="props">
+                                            <el-tag :type="statusLabels[props.row.status].type">{{
+                                                    statusLabels[props.row.status].label
+                                                }}
+                                            </el-tag>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="amount"
+                                        label="订单金额">
+                                        <template slot-scope="props">
+                                            ¥ {{ props.row.amount }}
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="deliveryProgress"
+                                        label="交付进度"
+                                        width="80">
+                                        <template slot-scope="props">
+                                            {{ props.row.deliveryProgress }}%
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="totalPayment"
+                                        label="已回金额">
+                                        <template slot-scope="props">
+                                            ¥ {{ props.row.totalPayment }}
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
                             </el-form-item>
                         </el-form>
                     </template>
@@ -152,21 +202,33 @@
                     label="联系人">
                 </el-table-column>
                 <el-table-column
-                    prop="totalAmountPerYear"
-                    label="年总成交额">
+                    label="联系电话"
+                    prop="phone">
                 </el-table-column>
                 <el-table-column
-                    prop="totalAmountCurrent"
-                    label="现存订单额">
+                    label="备用电话"
+                    prop="phoneStandby">
                 </el-table-column>
                 <el-table-column
-                    prop="totalAmountDelivered"
-                    label="已出货额">
+                    label="地址信息"
+                    prop="address">
                 </el-table-column>
-                <el-table-column
-                    prop="totalAmountDebt"
-                    label="欠缴">
-                </el-table-column>
+                <!--                <el-table-column-->
+                <!--                    prop="totalAmountPerYear"-->
+                <!--                    label="年总成交额">-->
+                <!--                </el-table-column>-->
+                <!--                <el-table-column-->
+                <!--                    prop="totalAmountCurrent"-->
+                <!--                    label="现存订单额">-->
+                <!--                </el-table-column>-->
+                <!--                <el-table-column-->
+                <!--                    prop="totalAmountDelivered"-->
+                <!--                    label="已出货额">-->
+                <!--                </el-table-column>-->
+                <!--                <el-table-column-->
+                <!--                    prop="totalAmountDebt"-->
+                <!--                    label="欠缴">-->
+                <!--                </el-table-column>-->
                 <el-table-column
                     prop="note"
                     label="备注">
@@ -209,7 +271,22 @@ export default {
         return {
             addDialogVisible: false,
             editDialogVisible: false,
-            tableData: [],
+            tableData: [{
+                id: '',
+                customer: '',
+                people: '',
+                phone: '',
+                phoneStandby: '',
+                address: '',
+                note: '',
+                totalAmountPerYear: '',
+                totalAmountCurrent: '',
+                totalAmountDelivered: '',
+                totalAmountDebt4Completed: '',
+                totalAmountDebt: '',
+            }],
+            customerDetails: [],// 展开行的数据
+            expandedRows: {},
             pageData: {
                 currentPage: 1,
                 pageSize: 10,
@@ -234,6 +311,15 @@ export default {
                 phoneStandby: '',
                 address: '',
                 note: '',
+            },
+            statusLabels: {
+                1: {type: 'warning', label: '未制作'},
+                2: {type: 'info', label: '制作中'},
+                3: {type: 'info', label: '部分交付'},
+                4: {type: '', label: '待回款'},
+                5: {type: 'success', label: '完成'},
+                6: {type: 'danger', label: '返厂'},
+                7: {type: 'danger', label: '作废'}
             },
             rules: {
                 customer: [
@@ -342,6 +428,35 @@ export default {
         handlePage(currentPage) {
             this.pageData.currentPage = currentPage
             this.getPage()
+        },
+        //处理行展开事件
+        handleExpandChange(row) {
+            const index = this.tableData.indexOf(row);
+            if (index !== -1) {
+                http.get(`/customers/${row.id}`).then(({data}) => {
+                    if (!data.code) {
+                        data.data.totalAmountPerYear = data.data.totalAmountPerYear !== null ? data.data.totalAmountPerYear.toFixed(2) : null;
+                        data.data.totalAmountCurrent = data.data.totalAmountCurrent !== null ? data.data.totalAmountCurrent.toFixed(2) : null;
+                        data.data.totalAmountDelivered = data.data.totalAmountDelivered !== null ? data.data.totalAmountDelivered.toFixed(2) : null;
+                        data.data.totalAmountDebt4Completed = data.data.totalAmountDebt4Completed !== null ? data.data.totalAmountDebt4Completed.toFixed(2) : null;
+                        data.data.totalAmountDebt = data.data.totalAmountDebt !== null ? data.data.totalAmountDebt.toFixed(2) : null;
+                        this.$set(this.customerDetails, index, JSON.parse(JSON.stringify(data.data)));
+                    }
+                });
+            }
+            http.get(`/orders/customers/${row.id}`).then(({data}) => {
+                if (!data.code) {
+                    data.data.forEach(record => {
+                        if (record.amount !== null) {
+                            record.amount = record.amount.toFixed(2)
+                        }
+                        if (record.totalPayment !== null) {
+                            record.totalPayment = record.totalPayment.toFixed(2)
+                        }
+                    })
+                    this.$set(this.expandedRows, row.id, data.data)
+                }
+            })
         }
     },
     mounted() {
@@ -376,9 +491,10 @@ export default {
         }
 
         .demo-table-expand .el-form-item {
-            margin-right: 0;
+            margin-left: 5%;
+            margin-right: 5%;
             margin-bottom: 0;
-            width: 50%;
+            width: 90%;
         }
 
         .pager {

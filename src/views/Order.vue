@@ -12,14 +12,14 @@
                 :rules="rules"
                 label-width="auto">
                 <el-form-item label="客户" prop="customer">
-                    <el-select v-model="addForm.customer" filterable placeholder="请选择客户"
+                    <el-select v-model="addForm.customerId" filterable placeholder="请选择客户"
                                @visible-change="selectCustomerClick"
-                               @change="(customer) => selectCustomerChange(customer, 1)">
+                               @change="(customerId) => selectCustomerChange(customerId, 1)">
                         <el-option
                             v-for="item in options4Customer"
                             :key="item.value"
                             :label="item.customer"
-                            :value="item.customer"
+                            :value="item.id"
                         >
                         </el-option>
                     </el-select>
@@ -99,14 +99,13 @@
                 :rules="rules"
                 label-width="80px">
                 <el-form-item label="客户" prop="customer">
-                    <el-select v-model="editForm.customer" filterable placeholder="请选择客户"
-                               @visible-change="selectCustomerClick"
-                               @change="(customer) => selectCustomerChange(customer, 2)">
+                    <el-select disabled v-model="editForm.customer" filterable placeholder="请选择客户"
+                    >
                         <el-option
                             v-for="item in options4Customer"
                             :key="item.value"
                             :label="item.customer"
-                            :value="item.customer"
+                            :value="item.id"
                         >
                         </el-option>
                     </el-select>
@@ -466,6 +465,7 @@ export default {
             addForm: {
                 id: 0,
                 orderId: "",
+                customerId: '',
                 customer: "",
                 people: "",
                 content: "",
@@ -480,6 +480,7 @@ export default {
             },
             editForm: {
                 id: 0,
+                customerId: "",
                 orderId: "",
                 customer: "",
                 people: "",
@@ -547,7 +548,7 @@ export default {
         }
     },
     methods: {
-        //新增客户提交表单
+        //新增提交表单
         submitForAdd() {
             this.$refs.addForm.validate((isValid) => {
                 if (isValid) {
@@ -566,7 +567,7 @@ export default {
                 }
             })
         },
-        //编辑客户提交表单
+        //编辑提交表单
         submitForEdit() {
             this.$refs.editForm.validate((isValid) => {
                 if (isValid) {
@@ -735,19 +736,13 @@ export default {
             })
         },
         //选择客户后自动填充
-        selectCustomerChange(customer, type) {
+        selectCustomerChange(customerId,) {
             let customerData = {}
-            customerData = this.options4Customer.find(item => item.customer === customer)
-            if (type === 1) {
-                this.addForm.people = JSON.parse(JSON.stringify(customerData.people))
-                this.addForm.phone = JSON.parse(JSON.stringify(customerData.phone))
-                this.addForm.address = JSON.parse(JSON.stringify(customerData.address))
-            }
-            if (type === 2) {
-                this.editForm.people = JSON.parse(JSON.stringify(customerData.people))
-                this.editForm.phone = JSON.parse(JSON.stringify(customerData.phone))
-                this.editForm.address = JSON.parse(JSON.stringify(customerData.address))
-            }
+            customerData = this.options4Customer.find(item => item.id === customerId)
+            this.addForm.people = JSON.parse(JSON.stringify(customerData.people))
+            this.addForm.phone = JSON.parse(JSON.stringify(customerData.phone))
+            this.addForm.address = JSON.parse(JSON.stringify(customerData.address))
+            this.addForm.customer = JSON.parse(JSON.stringify(customerData.customer))
         },
     },
     mounted() {
@@ -793,9 +788,10 @@ export default {
         }
 
         .demo-table-expand .el-form-item {
-            margin-right: 0;
+            margin-left: 5%;
+            margin-right: 5%;
             margin-bottom: 0;
-            width: 50%;
+            width: 90%;
         }
 
         .pager {

@@ -1,6 +1,5 @@
 <template>
     <el-row>
-        <el-button @click="test">测试</el-button>
         <el-col :span="8" style="padding-right: 10px">
             <el-card class="box-card">
                 <div class="user">
