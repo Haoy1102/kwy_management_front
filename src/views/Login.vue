@@ -22,7 +22,7 @@
 <script>
 import Mock from "mockjs";
 import Cookie from 'js-cookie'
-import {login} from "@/api";
+import http from "@/utils/request";
 
 export default {
     name: "Login",
@@ -52,16 +52,11 @@ export default {
             // 校验通过
             this.$refs.form.validate((valid) => {
                 if (valid) {
-                    login(this.form).then(({data}) => {
+                    http.post('/users/login',this.form).then(({data}) => {
                         console.log(data)
                         if (data.code === 0) {
-                            // token信息存入cookie用于不同页面间的通信
+                        //     // token信息存入cookie用于不同页面间的通信
                             Cookie.set('token', data.data)
-
-                            // 获取菜单的数据，存入store中
-                            // this.$store.commit('setMenu', data.data.menu)
-                            // this.$store.commit('addMenu', this.$router)
-                            // 跳转到首页
                             this.$router.push('/home')
                         } else {
                             this.$message.error(data.message);

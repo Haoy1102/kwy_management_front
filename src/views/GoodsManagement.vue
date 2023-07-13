@@ -512,6 +512,7 @@ export default {
                             this.handleCloseForEdit()
                             this.$message.success(data.message)
                         } else {
+                            this.handleCloseForEdit()
                             this.$message.error(data.message)
                         }
                     }).finally(() => {

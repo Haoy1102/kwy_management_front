@@ -107,7 +107,17 @@
                     prop="note"
                     label="备注">
                 </el-table-column>
-
+                <el-table-column
+                    width="150"
+                    label="操作"
+                    >
+                    <template slot-scope="scope">
+                        <el-button
+                            size="mini"
+                            @click="handleEdit(scope.$index, scope.row)">编辑
+                        </el-button>
+                    </template>
+                </el-table-column>
             </el-table>
             <div class="pager">
                 <el-pagination
@@ -176,11 +186,12 @@ export default {
         submitForEdit() {
             this.$refs.editForm.validate((isValid) => {
                 if (isValid) {
-                    http.put(`/purchase`, this.editForm).then(({data}) => {
+                    http.put(`/goods/records`, this.editForm).then(({data}) => {
                         if (!data.code) {
                             this.handleCloseForEdit()
                             this.$message.success(data.message)
                         } else {
+                            this.handleCloseForEdit()
                             this.$message.error(data.message)
                         }
                     }).finally(() => {

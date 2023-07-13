@@ -127,7 +127,6 @@
                     </template>
                 </el-table-column>
 
-
                 <el-table-column
                     prop="value"
                     label="估值">
@@ -245,6 +244,7 @@ export default {
                             this.handleCloseForEdit()
                             this.$message.success(data.message)
                         } else {
+                            this.handleCloseForEdit()
                             this.$message.error(data.message)
                         }
                     }).finally(() => {

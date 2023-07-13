@@ -15,27 +15,27 @@
                 </div>
             </el-card>
             <el-card style="margin-top: 20px; height: 460px;">
-                <el-table
-                    :data="tableData"
-                    style="width: 100%">
-                    <!--                    <el-table-column-->
-                    <!--                        prop="name"-->
-                    <!--                        label="商家">-->
-                    <!--                    </el-table-column>-->
-                    <!--                    <el-table-column-->
-                    <!--                        prop="todayBuy"-->
-                    <!--                        label="今日购买">-->
-                    <!--                    </el-table-column>-->
-                    <!--                    <el-table-column-->
-                    <!--                        prop="monthBuy"-->
-                    <!--                        label="本月购买">-->
-                    <!--                    </el-table-column>-->
-                    <!--                    <el-table-column-->
-                    <!--                        prop="totalBuy"-->
-                    <!--                        label="总购买">-->
-                    <!--                    </el-table-column>-->
-                    <el-table-column v-for="(val,key) in tableLable" :key="key" :prop="key" :label="val"/>
-                </el-table>
+<!--                <el-table-->
+<!--                    :data="tableData"-->
+<!--                    style="width: 100%">-->
+<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        prop="name"&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        label="商家">&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        prop="todayBuy"&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        label="今日购买">&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        prop="monthBuy"&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        label="本月购买">&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        prop="totalBuy"&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        label="总购买">&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+<!--                    <el-table-column v-for="(val,key) in tableLable" :key="key" :prop="key" :label="val"/>-->
+<!--                </el-table>-->
             </el-card>
         </el-col>
         <el-col :span="16" style="padding-left: 10px">
@@ -44,7 +44,7 @@
                     <i class="icon" :class="`el-icon-${item.icon}`" :style="{background:item.color}"></i>
                     <div class="detail">
                         <p class="price">¥ {{ item.value }}</p>
-                        <p class="desc">{{ item.name }}</p>
+                        <p class="desc">{{ item.lable }}</p>
                     </div>
                 </el-card>
             </div>
@@ -54,20 +54,21 @@
             </el-card>
             <div class="graph">
                 <el-card style="height: 260px">
-                    <div ref="echarts2" style="height: 260px"></div>
+<!--                    <div ref="echarts2" style="height: 260px"></div>-->
                 </el-card>
                 <el-card style="height: 260px">
-                    <div ref="echarts3" style="height: 240px"></div>
+<!--                    <div ref="echarts3" style="height: 240px"></div>-->
                 </el-card>
-
             </div>
+
         </el-col>
     </el-row>
 
 </template>
 
 <script>
-import {getData, test} from "@/api";
+import http from "@/utils/request";
+import * as echarts from "echarts";
 
 export default {
     name: "Home",
@@ -82,58 +83,125 @@ export default {
             },
             countData: [
                 {
-                    name: "今日支付订单",
-                    value: 1234,
+                    name: "totalAmount",
+                    lable: '近3月订单总额',
+                    value: null,
                     icon: "success",
                     color: "#2ec7c9",
                 },
                 {
-                    name: "今日收藏订单",
-                    value: 210,
+                    name: "totalAmountCurrent",
+                    lable: '现存订单额',
+                    value: null,
                     icon: "star-on",
                     color: "#ffb980",
                 },
                 {
-                    name: "今日未支付订单",
-                    value: 1234,
+                    name: "totalAmountDelivered",
+                    lable: "已出货金额",
+                    value: null,
                     icon: "s-goods",
                     color: "#5ab1ef",
                 },
                 {
-                    name: "本月支付订单",
-                    value: 1234,
+                    name: "totalAmountNoDelivered",
+                    lable: "未出货金额",
+                    value: null,
                     icon: "success",
                     color: "#2ec7c9",
                 },
                 {
-                    name: "本月收藏订单",
-                    value: 210,
+                    name: "totalAmountDebt",
+                    lable: "待入账总金额",
+                    value: null,
                     icon: "star-on",
                     color: "#ffb980",
                 },
                 {
-                    name: "本月未支付订单",
-                    value: 1234,
+                    name: "totalAssetsMaterial",
+                    lable: "原材料总资产",
+                    value: null,
                     icon: "s-goods",
                     color: "#5ab1ef",
                 },
             ],
         }
     },
-    mounted() {
-        getData().then(({data}) => {
-            const {tableData} = data.data
-            console.log(tableData)
-            this.tableData = tableData
-        })
-    },
-    methods:{
-        test(){
-            test().then(({data})=>{
-                console.log(data.data)
+    methods: {
+        getAcount() {
+            let month = 3
+            http.get(`/accounts/${month}`).then(({data}) => {
+                if (!data.code) {
+                    data.data.totalAmount = data.data.totalAmount !== null ? data.data.totalAmount.toFixed(2) : null;
+                    data.data.totalAmountCurrent = data.data.totalAmountCurrent !== null ? data.data.totalAmountCurrent.toFixed(2) : null;
+                    data.data.totalAmountDelivered = data.data.totalAmountDelivered !== null ? data.data.totalAmountDelivered.toFixed(2) : null;
+                    data.data.totalAmountNoDelivered = data.data.totalAmountNoDelivered !== null ? data.data.totalAmountNoDelivered.toFixed(2) : null;
+                    data.data.totalAmountDebt = data.data.totalAmountDebt !== null ? data.data.totalAmountDebt.toFixed(2) : null;
+                    data.data.totalAssetsMaterial = data.data.totalAssetsMaterial !== null ? data.data.totalAssetsMaterial.toFixed(2) : null;
+                    this.countData = this.countData.map(item => {
+                        // 在这里根据你的需求修改value的值
+                        item.value = data.data[item.name]; // 使用data中对应的值来替换
+                        return item;
+                    });
+                } else {
+                    this.$message.error(data.messages)
+                }
             })
         }
-    }
+    },
+    mounted() {
+
+        // var myChart1 = echarts.init(this.$refs.echarts1);
+        // // 指定图表的配置项和数据
+        // var option = {
+        //     legend: {},
+        //     tooltip: {},
+        //     dataset: {
+        //         // 提供一份数据。
+        //         source: [
+        //             ['product', '2015', '2016', '2017'],
+        //             ['Matcha Latte', 43.3, 85.8, 93.7],
+        //             ['Milk Tea', 83.1, 73.4, 55.1],
+        //             ['Cheese Cocoa', 86.4, 65.2, 82.5],
+        //             ['Walnut Brownie', 72.4, 53.9, 39.1]
+        //         ]
+        //     },
+        //     // 声明一个 X 轴，类目轴（category）。默认情况下，类目轴对应到 dataset 第一列。
+        //     xAxis: { type: 'category' },
+        //     // 声明一个 Y 轴，数值轴。
+        //     yAxis: {},
+        //     // 声明多个 bar 系列，默认情况下，每个系列会自动对应到 dataset 的每一列。
+        //     series: [{ type: 'bar' }, { type: 'bar' }, { type: 'bar' }]
+        // };
+        // // 使用刚指定的配置项和数据显示图表。
+        // myChart1.setOption(option);
+        //
+        // var myChart2 = echarts.init(this.$refs.echarts2);
+        // var option2 = {
+        //     xAxis: {
+        //         data: ['A', 'B', 'C', 'D', 'E']
+        //     },
+        //     yAxis: {},
+        //     series: [
+        //         {
+        //             data: [10, 22, 28, 23, 19],
+        //             type: 'line',
+        //             areaStyle: {}
+        //         },
+        //         {
+        //             data: [25, 14, 23, 35, 10],
+        //             type: 'line',
+        //             areaStyle: {
+        //                 color: '#ff0',
+        //                 opacity: 0.5
+        //             }
+        //         }
+        //     ]
+        // };
+        // myChart2.setOption(option2);
+
+        this.getAcount()
+    },
 }
 </script>
 
@@ -192,13 +260,14 @@ export default {
     }
 
     .detail {
-        margin-left: 15px;
+        margin-left: 10px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: left;
 
         .price {
-            font-size: 30px;
+            font-size: 20px;
+            margin-top: 10px;
             margin-bottom: 10px;
             line-height: 30px;
             height: 30px;
@@ -207,7 +276,7 @@ export default {
         .desc {
             font-size: 14px;
             color: #999;
-            text-align: center;
+            text-align: left;
         }
     }
 

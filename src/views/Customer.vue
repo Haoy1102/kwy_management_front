@@ -113,19 +113,65 @@
                         <el-form label-position="left"
                                  :model="customerDetails[props.$index]"
                                  class="demo-table-expand">
-                            <el-form-item label="年总成交额" prop="totalAmountPerYear">
+
+                            <el-form-item  >
+                                <label style="margin-right: 0">年总成交额</label>
+                                <el-tooltip class="item-tooltip"
+                                            effect="dark"
+                                            :content="`(非作废，非返场)的年总订单额度`"
+                                            placement="top">
+                                    <i class="el-icon-info"></i>
+                                </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountPerYear }}</span>
                             </el-form-item>
-                            <el-form-item label="现存订单额">
+                            <el-form-item >
+                                <label style="margin-right: 0">现存订单额</label>
+                                <el-tooltip class="item-tooltip"
+                                            effect="dark"
+                                            :content="`目前未完成(非作废，非返场)的订单额度）`"
+                                            placement="top">
+                                    <i class="el-icon-info"></i>
+                                </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountCurrent }}</span>
                             </el-form-item>
-                            <el-form-item label="已出货额">
+                            <el-form-item >
+                                <label style="margin-right: 0">已出货额</label>
+                                <el-tooltip class="item-tooltip"
+                                            effect="dark"
+                                            :content="`目前未完成(非作废，非返场)的订单 订单金额*出货进度`"
+                                            placement="top">
+                                    <i class="el-icon-info"></i>
+                                </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountDelivered }}</span>
                             </el-form-item>
-                            <el-form-item label="欠款额度">
+                            <el-form-item >
+                                <label style="margin-right: 0">欠款额度</label>
+                                <el-tooltip class="item-tooltip"
+                                            effect="dark"
+                                            :content="`(待回款状态下) 现存订单额度-已回金额`"
+                                            placement="top">
+                                    <i class="el-icon-info"></i>
+                                </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountDebt4Completed }}</span>
                             </el-form-item>
-                            <el-form-item label="总待支付金额">
+                            <el-form-item >
+                                <label style="margin-right: 0">总支付金额</label>
+                                <el-tooltip class="item-tooltip"
+                                            effect="dark"
+                                            :content="`目前未完成(非作废，非返场)的订单 总支付金额`"
+                                            placement="top">
+                                    <i class="el-icon-info"></i>
+                                </el-tooltip>
+                                <span>¥ {{ customerDetails[props.$index].totalAmountPayment }}</span>
+                            </el-form-item>
+                            <el-form-item >
+                                <label style="margin-right: 0">总待支付金额</label>
+                                <el-tooltip class="item-tooltip"
+                                            effect="dark"
+                                            :content="`(非作废，非返场) 现存订单额度-总支付金额`"
+                                            placement="top">
+                                    <i class="el-icon-info"></i>
+                                </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountDebt }}</span>
                             </el-form-item>
                             <el-form-item label="备注">
@@ -358,6 +404,7 @@ export default {
                             this.handleCloseForEdit()
                             this.$message.success(data.message)
                         } else {
+                            this.handleCloseForEdit()
                             this.$message.error(data.message)
                         }
                     }).finally(() => {
@@ -439,6 +486,7 @@ export default {
                         data.data.totalAmountCurrent = data.data.totalAmountCurrent !== null ? data.data.totalAmountCurrent.toFixed(2) : null;
                         data.data.totalAmountDelivered = data.data.totalAmountDelivered !== null ? data.data.totalAmountDelivered.toFixed(2) : null;
                         data.data.totalAmountDebt4Completed = data.data.totalAmountDebt4Completed !== null ? data.data.totalAmountDebt4Completed.toFixed(2) : null;
+                        data.data.totalAmountPayment = data.data.totalAmountPayment !== null ? data.data.totalAmountPayment.toFixed(2) : null;
                         data.data.totalAmountDebt = data.data.totalAmountDebt !== null ? data.data.totalAmountDebt.toFixed(2) : null;
                         this.$set(this.customerDetails, index, JSON.parse(JSON.stringify(data.data)));
                     }
@@ -481,14 +529,14 @@ export default {
         position: relative;
         height: calc(100% - 62px);
 
-        .demo-table-expand {
-            font-size: 0;
-        }
+        //.demo-table-expand {
+        //    font-size: 0;
+        //}
 
-        .demo-table-expand label {
-            width: 90px;
-            color: #99a9bf;
-        }
+        //.demo-table-expand label {
+        //    width: 90px;
+        //    color: #99a9bf;
+        //}
 
         .demo-table-expand .el-form-item {
             margin-left: 5%;
@@ -502,7 +550,10 @@ export default {
             bottom: 0;
             right: 20px;
         }
-
+        .item-tooltip{
+            width: 3%;
+        }
     }
+
 }
 </style>

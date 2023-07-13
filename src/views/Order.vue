@@ -252,6 +252,9 @@
         </el-dialog>
 
         <div class="manage-header">
+            <el-button @click="printTicket" type="primary">
+                打印
+            </el-button>
             <el-button @click="handleAdd" type="primary">
                 + 新增订单
             </el-button>
@@ -548,6 +551,10 @@ export default {
         }
     },
     methods: {
+        // 在Element UI的某个事件中触发打印
+        printTicket() {
+            window.print();
+        },
         //新增提交表单
         submitForAdd() {
             this.$refs.addForm.validate((isValid) => {
@@ -577,6 +584,7 @@ export default {
                             this.handleCloseForEdit()
                             this.$message.success(data.message)
                         } else {
+                            this.handleCloseForEdit()
                             this.$message.error(data.message)
                         }
                     }).finally(() => {
@@ -799,6 +807,16 @@ export default {
             bottom: 0;
             right: 20px;
         }
+    }
+
+    @media print {
+        /* 打印样式规则 */
+        /* 隐藏不需要打印的元素 */
+        .no-print {
+            display: none;
+        }
+        /* 调整打印页面的布局和样式 */
+        /* 例如，设置合适的页面尺寸、页边距等 */
     }
 
 }
