@@ -27,11 +27,12 @@ http.interceptors.response.use(
         console.log(response)
         //自定义设置后台返回code对应的响应方式
         if (response.data.code === 41015) { // 未登录或登录超时
-            router.push('login'); // 替换为你的首页路由路径
+            if (router.currentRoute.path !== '/login') { // 当前页面不是登录页面
+                router.push('login'); // 替换为你的首页路由路径
+            }
             // return Promise.reject(new Error('登录超时'));
-        } else { //接口正常，返回数据
-            return response;
         }
+        return response;
     },
     error => {
         if (error.message) {

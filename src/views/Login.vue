@@ -47,16 +47,14 @@ export default {
             // // token信息
             // const token = Mock.Random.guid()
             // Cookie.set('token',token)
-            console.log(this.form)
+            // console.log(this.form)
 
             // 校验通过
             this.$refs.form.validate((valid) => {
                 if (valid) {
-                    http.post('/users/login',this.form).then(({data}) => {
-                        console.log(data)
-                        if (data.code === 0) {
-                        //     // token信息存入cookie用于不同页面间的通信
-                            Cookie.set('token', data.data)
+                    http.post('/employees/login',this.form).then(({data}) => {
+                        // console.log(data)
+                        if (!data.code) {
                             this.$router.push('/home')
                         } else {
                             this.$message.error(data.message);

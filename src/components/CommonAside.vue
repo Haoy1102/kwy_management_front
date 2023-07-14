@@ -8,12 +8,12 @@
              background-color="#545c64"
              text-color="#fff"
              active-text-color="#ffd04b">
-        <h3> {{ isCollapse ? '后台' : '通用后台管理' }}</h3>
-        <el-menu-item @click="clickMenu(item)" v-for="item in noChildren" :key="item.name" :index="item.path">
+        <h3> {{ isCollapse ? '后台' : '后台管理' }}</h3>
+        <el-menu-item @click="clickMenu(item)" v-for="item in noChildren" :key="item.name" :index="item.name">
             <i :class="`el-icon-${item.icon}`"></i>
             <span slot="title">{{ item.label }}</span>
         </el-menu-item>
-        <el-submenu v-for="item in hasChildren" :key="item.lable" :index="item.lable">
+        <el-submenu v-for="item in hasChildren" :key="item.lable" :index="item.index">
             <template slot="title">
                 <i :class="`el-icon-${item.icon}`"></i>
                 <span slot="title">{{ item.label }}</span>
@@ -61,61 +61,108 @@ export default {
                     name: 'home',
                     label: '首页-账务',
                     icon: 's-home',
-                    url: 'Home.vue'
+                    url: 'Home.vue',
+                    index:1
                 },
-
+                {
+                    path: '/employee_management',
+                    name: 'employee_management',
+                    label: '员工信息',
+                    icon: 'user',
+                    url: 'EmployeeManagement.vue',
+                    index:2
+                },
+                {
+                    label: '产品管理',
+                    icon: 'sell',
+                    index:3,
+                    children: [
+                        {
+                            path: '/product_overview',
+                            name: 'product_overview',
+                            label: '产品总览',
+                            icon: 'view',
+                            url: 'ProductOverview.vue',
+                            index:1
+                        },
+                        {
+                            path: '/product_management',
+                            name: 'product_management',
+                            label: '产品管理',
+                            icon: 'info',
+                            url: 'ProductManagement.vue',
+                            index:2
+                        },
+                        {
+                            path: '/product_record',
+                            name: 'product_record',
+                            label: '批次记录',
+                            icon: 'shopping-cart-2',
+                            url: 'ProductRecord.vue',
+                            index:3
+                        },
+                    ]
+                },
                 {
                     path: '/customer',
                     name: 'customer',
                     label: '客户信息',
                     icon: 's-custom',
-                    url: 'Customer.vue'
+                    url: 'Customer.vue',
+                    index:4
                 },
                 {
                     path: '/order',
                     name: 'order',
                     label: '订单管理',
                     icon: 's-order',
-                    url: 'Order.vue'
+                    url: 'Order.vue',
+                    index:5
                 },
                 {
                     label: '原料管理',
                     icon: 'box',
+                    index:6,
                     children: [
                         {
                             path: '/material_overview',
                             name: 'material_overview',
                             label: '材料总览',
                             icon: 'view',
-                            url: 'MaterialOverview.vue'
+                            url: 'MaterialOverview.vue',
+                            index:1
                         },
                         {
                             path: '/material_info',
                             name: 'material_info',
                             label: '原料管理',
                             icon: 'info',
-                            url: 'MaterialInfo.vue'
+                            url: 'MaterialInfo.vue',
+                            index:2
                         },
                         {
                             path: '/purchase',
                             name: 'purchase',
                             label: '采购记录',
                             icon: 'shopping-cart-2',
-                            url: 'Purchase.vue'
+                            url: 'Purchase.vue',
+                            index:3
                         },
                         {
                             path: '/goods_management',
                             name: 'goods_management',
                             label: '库存管理',
                             icon: 'box',
-                            url: 'GoodsManagement.vue'
+                            url: 'GoodsManagement.vue',
+                            index:4
                         },
                         {
                             path: '/goods_record',
                             name: 'goods_record',
                             label: '库存记录',
                             icon: 'document',
-                            url: 'GoodsRecord.vue'
+                            url: 'GoodsRecord.vue',
+                            index:5
                         }
                     ]
                 },
@@ -137,7 +184,6 @@ export default {
     computed: {
         //没有子菜单
         noChildren() {
-            // console.log(this.menuData.filter(item => !item.children),'noChildren')
             return this.menuData.filter(item => !item.children)
         },
         //有子菜单

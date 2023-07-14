@@ -147,7 +147,8 @@ export default {
                     this.$message.error(data.messages)
                 }
             })
-        }
+        },
+
     },
     mounted() {
 

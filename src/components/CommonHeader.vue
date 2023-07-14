@@ -25,6 +25,7 @@
 <script>
 import {mapState} from "vuex";
 import Cookie from "js-cookie";
+import http from "@/utils/request";
 
 export default {
     name: "CommonHeader",
@@ -35,6 +36,11 @@ export default {
         handleClick(command){
             //登出按钮
             if (command==='logout'){
+                http.post('/employees/logout').then(({data})=>{
+                    if (!data.code){
+                        this.$message.success(data.message)
+                    }
+                })
                 Cookie.remove('token')
                 Cookie.remove('menu')
                 this.$router.push('login')

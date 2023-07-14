@@ -10,7 +10,8 @@
                 ref="addForm"
                 :model="addForm"
                 :rules="rules"
-                label-width="auto">
+                label-width="auto"
+                :close-on-click-modal="false">
                 <el-form-item label="客户" prop="customer">
                     <el-select v-model="addForm.customerId" filterable placeholder="请选择客户"
                                @visible-change="selectCustomerClick"
