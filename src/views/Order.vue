@@ -392,6 +392,143 @@
             </span>
         </el-dialog>
 
+        <el-dialog
+            title="库存单(全选状态下默认出货最早生产时间货品)"
+            :visible.sync="deliverDialogVisible"
+            width="60%"
+            :before-close="handleCloseForDeliver">
+            <div style="height: 350px;">
+                <el-table
+                    stripe
+                    ref="tableRef"
+                    height="90%"
+                    :data="curProducts"
+                    style="width: 100%"
+                    @selection-change="handleSelectionChange"
+                    :default-selection="curProducts">
+                    <el-table-column
+                        type="selection"
+                        width="55">
+                    </el-table-column>
+                    <el-table-column
+                        prop="batchId"
+                        label="货号">
+                    </el-table-column>
+                    <el-table-column
+                        prop="productName"
+                        label="产品名称">
+                    </el-table-column>
+                    <el-table-column
+                        prop="productCode"
+                        label="产品编号">
+                    </el-table-column>
+                    <el-table-column
+                        prop="number"
+                        label="数量">
+                    </el-table-column>
+                    <el-table-column
+                        prop="unit"
+                        label="单位">
+                    </el-table-column>
+                    <el-table-column
+                        prop="producedDate"
+                        label="生产日期">
+                    </el-table-column>
+                    <el-table-column
+                        prop="location"
+                        label="仓储">
+                    </el-table-column>
+                    <!--                <el-table-column-->
+                    <!--                    width="150"-->
+                    <!--                    label="操作">-->
+                    <!--                    <template slot-scope="scope">-->
+                    <!--                        <el-button-->
+                    <!--                            size="mini"-->
+                    <!--                            type="danger"-->
+                    <!--                            @click="handleDelete4Payment(scope.$index, scope.row)">删除-->
+                    <!--                        </el-button>-->
+                    <!--                    </template>-->
+                    <!--                </el-table-column>-->
+                </el-table>
+            </div>
+            <span slot="footer" class="dialog-footer"
+                  style="display: flex; align-items: center; justify-content: space-between;">
+                <el-progress type="circle" :percentage=percentage width="50"
+                             style="margin-left: 10px">
+                </el-progress>
+                 <el-statistic>
+                    <template slot="formatter"> {{ curTotalSelectNumber }}/{{ curRowNumberNeed4Product }} </template>
+                 </el-statistic>
+                <!--                <div>-->
+                    <el-button @click="handleCloseForDeliver">取 消</el-button>
+                    <el-button type="primary" @click="submitForDeliver">确 定</el-button>
+                <!--                </div>-->
+            </span>
+        </el-dialog>
+
+        <el-dialog
+            title="编辑"
+            :visible.sync="editOrderDetailDialogVisible"
+            width="30%"
+            :before-close="handleCloseForEditOrderDetail">
+            <!--  b时用户的表单信息-->
+            <el-form
+                ref="editOrderDetailForm"
+                :model="editOrderDetailForm"
+                :rules="rules"
+                label-width="80px">
+
+                <el-form-item label="产品名称" prop="productName">
+                    <el-input disabled placeholder="请输入订单内容" v-model="editOrderDetailForm.productName"></el-input>
+                </el-form-item>
+                <el-form-item label="产品编号" prop="productCode">
+                    <el-input disabled placeholder="请输入联系人名称" v-model="editOrderDetailForm.productCode"></el-input>
+                </el-form-item>
+                <el-form-item label="数量" prop="number">
+                    <el-input placeholder="请输入联系电话" v-model="editOrderDetailForm.number"></el-input>
+                </el-form-item>
+                <el-form-item label="单位" prop="unit">
+                    <el-input placeholder="请输入地址" v-model="editOrderDetailForm.unit"></el-input>
+                </el-form-item>
+                <el-form-item label="件数" prop="packageNumber">
+                    <el-input-number
+                        placeholder="产品件数"
+                        :precision="0"
+                        v-model.number="editOrderDetailForm.packageNumber"
+                        size="small">
+                    </el-input-number>
+                </el-form-item>
+                <el-form-item label="单价" prop="price">
+                    <el-input-number
+                        placeholder="请输入订单金额"
+                        :precision="2"
+                        v-model.number="editOrderDetailForm.price"
+                        size="small">
+                    </el-input-number>
+                </el-form-item>
+                <el-form-item label="金额" prop="amount">
+                    <el-input-number
+                        placeholder="请输入订单金额"
+                        :precision="2"
+                        v-model.number="editOrderDetailForm.amount"
+                        size="small">
+                    </el-input-number>
+                </el-form-item>
+                <el-form-item label="备注" prop="note">
+                    <el-input
+                        type="textarea"
+                        :rows="3"
+                        placeholder="请输入备注内容"
+                        v-model="editOrderDetailForm.note">
+                    </el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="handleCloseForEditOrderDetail">取 消</el-button>
+                <el-button type="primary" @click="submitForEditOrderDetail">确 定</el-button>
+            </span>
+        </el-dialog>
+
         <div class="manage-header">
             <!--            <el-button @click="printTicket" type="primary">-->
             <!--                打印-->
@@ -420,16 +557,11 @@
                 stripe
                 height="90%"
                 :data="tableData"
-                style="width: 100%">
+                style="width: 100%"
+                @expand-change="handleExpandChange">
                 <el-table-column type="expand">
                     <template slot-scope="props">
-                        <el-form label-position="left" inline class="demo-table-expand">
-                            <el-form-item label="客户名称">
-                                <span>{{ props.row.customer }}</span>
-                            </el-form-item>
-                            <el-form-item label="订单内容">
-                                <span>{{ props.row.content }}</span>
-                            </el-form-item>
+                        <el-form label-position="left" class="demo-table-expand">
                             <el-form-item label="联系人 ">
                                 <span>{{ props.row.people }}</span>
                             </el-form-item>
@@ -439,44 +571,117 @@
                             <el-form-item label="地址信息">
                                 <span>{{ props.row.address }}</span>
                             </el-form-item>
-                            <el-form-item label="创建日期">
-                                <span>{{ props.row.createDate }}</span>
-                            </el-form-item>
-                            <el-form-item label="订单状态">
-                                <el-tag :type="statusLabels[props.row.status].type">
-                                    {{ statusLabels[props.row.status].label }}
-                                </el-tag>
-                            </el-form-item>
-                            <el-form-item label="订单金额">
-                                <span>¥ {{ props.row.amount }}</span>
-                            </el-form-item>
-                            <el-form-item label="交付进度">
-                                <span>{{ props.row.deliveryProgress }}%</span>
-                            </el-form-item>
-                            <el-form-item label="已回金额">
-                                <span>¥ {{ props.row.totalPayment }}</span>
-                            </el-form-item>
                             <el-form-item label="备注">
                                 <span>{{ props.row.note }}</span>
                             </el-form-item>
                             <el-form-item label="最后操作">
                                 <span>{{ props.row.updateTime }}</span>
                             </el-form-item>
+                            <el-form-item label="订单内容">
+                                <el-button type="primary" size="small" :disabled="selectedItemsCount === 0">一键出货
+                                </el-button>
+                                <el-table
+                                    :data="expandedRows[props.row.id]"
+                                    style="width: 100%"
+                                    @selection-change="handleSelectionChange4OrderDetails">
+                                    <el-table-column
+                                        type="selection"
+                                        width="55">
+                                    </el-table-column>
+                                    <!-- 其他表格列 -->
+                                    <el-table-column
+                                        prop="productName"
+                                        label="产品名称">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="productCode"
+                                        label="产品编号">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="packageNumber"
+                                        label="件数">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="number"
+                                        label="数量">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="unit"
+                                        label="单位">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="price"
+                                        label="单价">
+                                        <template slot-scope="props">
+                                            ¥ {{ props.row.price }}
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="amount"
+                                        label="金额">
+                                        <template slot-scope="props">
+                                            ¥ {{ props.row.amount }}
+                                        </template>
+                                    </el-table-column>
+                                    <!--                                    <el-table-column-->
+                                    <!--                                        prop="isDelivered"-->
+                                    <!--                                        label="发货状态">-->
+                                    <!--                                    </el-table-column>-->
+                                    <el-table-column
+                                        prop="isDelivered"
+                                        label="发货状态"
+                                        width="90">
+                                        <template slot-scope="props">
+                                            <el-tag :type="status4isDelivered[props.row.isDelivered].type">{{
+                                                    status4isDelivered[props.row.isDelivered].label
+                                                }}
+                                            </el-tag>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="deliveredDate"
+                                        label="发货日期">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="note"
+                                        label="备注">
+                                    </el-table-column>
+                                    <el-table-column
+                                        width="210"
+                                        label="操作">
+                                        <template slot-scope="scope">
+                                            <el-button
+                                                size="mini"
+                                                type="success"
+                                                :disabled="props.row.isDelivered === 0"
+                                                @click="handleDeliver(scope.$index, scope.row)">发货
+                                            </el-button>
+                                            <el-button
+                                                size="mini"
+                                                type="primary"
+                                                @click="handleEdit4OrderDetail(scope.$index, scope.row)">编辑
+                                            </el-button>
+
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-form-item>
                         </el-form>
                     </template>
                 </el-table-column>
                 <el-table-column
                     prop="orderId"
-                    label="订单号">
+                    label="订单号"
+                    width="200">
                 </el-table-column>
                 <el-table-column
                     prop="customer"
                     label="客户">
                 </el-table-column>
-                <el-table-column
-                    prop="content"
-                    label="订单内容">
-                </el-table-column>
+                <!--                <el-table-column-->
+                <!--                    prop="content"-->
+                <!--                    label="订单内容">-->
+                <!--                </el-table-column>-->
                 <el-table-column
                     prop="people"
                     label="联系人"
@@ -572,8 +777,15 @@ export default {
             addPaymentDialogVisible: false,
             editPaymentDialogVisible: false,
             addOrderDetailDialogVisible: false,
+            editOrderDetailDialogVisible:false,
             showResult4AddOrder: false,
+            deliverDialogVisible: false,
+            expandedRows: {},
             tableData: [],
+            curTotalSelectNumber: 0,
+            curRowNumberNeed4Product: 0,
+            percentage: 0,
+            selectedItems: [], // 存储选中的项
             orderDetailTableData: [],
             options4Customer: [],
             options4Product: [],
@@ -642,6 +854,21 @@ export default {
                 totalPayment: '',
                 note: "",
             },
+            editOrderDetailForm:{
+                id: '',
+                orderId: '',
+                productId: '',
+                productName: '',
+                productCode: '',
+                packageNumber: 0,
+                unit: '',
+                number: 0,
+                price: 0,
+                amount: 0,
+                isDelivered: '',
+                deliveredDate: '',
+                note: "",
+            },
             payForm: {
                 id: '',
                 orderId: '',
@@ -668,6 +895,9 @@ export default {
             curPaymentDetail: [
                 {}, {}, {}, {}
             ],
+            curProducts: [
+                {}, {}, {}, {}
+            ],
             curOrderInfo: '',
             statusLabels: {
                 1: {type: 'warning', label: '未制作'},
@@ -677,6 +907,10 @@ export default {
                 5: {type: 'success', label: '完成'},
                 6: {type: 'danger', label: '返厂'},
                 7: {type: 'danger', label: '作废'}
+            },
+            status4isDelivered: {
+                0: {type: 'warning', label: '未发货'},
+                1: {type: 'success', label: '已发货'},
             },
             rules: {
                 productName: [
@@ -737,35 +971,35 @@ export default {
         printTicket() {
             window.print();
         },
-        //新增提交表单
-        submitForAdd() {
-            this.$refs.addForm.validate((isValid) => {
-                if (isValid) {
-                    http.post(`/orders`, this.addForm).then(({data}) => {
-                        // console.log(data)
-                        if (!data.code) {
-                            this.handleCloseForAdd()
-                            this.$message.success(data.message)
-                        } else {
-                            this.$message.error(data.message)
-                        }
-                    }).finally(() => {
-                        //重新加载数据
-                        this.getPage();
-                    })
-                }
-            })
-        },
+        // //新增提交表单
+        // submitForAdd() {
+        //     this.$refs.addForm.validate((isValid) => {
+        //         if (isValid) {
+        //             http.post(`/orders`, this.addForm).then(({data}) => {
+        //                 // console.log(data)
+        //                 if (!data.code) {
+        //                     this.handleCloseForAdd()
+        //                     this.$message.success(data.message)
+        //                 } else {
+        //                     this.$message.error(data.message)
+        //                 }
+        //             }).finally(() => {
+        //                 //重新加载数据
+        //                 this.getPage();
+        //             })
+        //         }
+        //     })
+        // },
         //新增提交表单
         submitForAddOrder() {
             this.activeStep++
-            let loadingInstance = Loading.service({text:"正在提交中..."})
-            console.log(this.orderDetailTableData,'orderDetailTableData')
+            let loadingInstance = Loading.service({text: "正在提交中..."})
+            console.log(this.orderDetailTableData, 'orderDetailTableData')
             this.addForm.orderDetails = this.orderDetailTableData;
             http.post(`/orders`, this.addForm).then(({data}) => {
                 // console.log(data)
                 if (!data.code) {
-                    this.showResult4AddOrder=true
+                    this.showResult4AddOrder = true
                     this.$message.success(data.message)
                 } else {
                     this.$message.error(data.message)
@@ -796,6 +1030,10 @@ export default {
                 }
             })
         },
+        //编辑订单明细提交表单
+        submitForEditOrderDetail(){
+
+        },
         //新增回款明细提交表单
         submitForAddPayment() {
             this.payForm.orderId = this.curOrderInfo.orderId
@@ -817,6 +1055,10 @@ export default {
             console.log(this.orderDetailTableData, 'this.orderDetailTableData')
             this.addOrderDetailDialogVisible = false
         },
+        //新增出货提交表单
+        submitForDeliver() {
+
+        },
         //查询按钮点击事件
         searchSubmit() {
             this.getPage()
@@ -828,7 +1070,7 @@ export default {
             });
             this.addDialogVisible = true
             //刷新最后的结果状态
-            this.showResult4AddOrder=false
+            this.showResult4AddOrder = false
         },
         //新增明细点击事件
         handleAddPayment() {
@@ -844,32 +1086,42 @@ export default {
             //深拷贝 否则会直接修改数据
             this.editForm = JSON.parse(JSON.stringify(row))
         },
+        //订单明细编辑按钮点击事件
+        handleEdit4OrderDetail(index, row){
+            this.editOrderDetailDialogVisible = true
+            this.editOrderDetailForm = JSON.parse(JSON.stringify(row))
+        },
         //回款按钮点击事件
         handlePayment(index, row) {
             //获取回款明细
             this.getPaymentDetail(row.orderId)
-
             this.editPaymentDialogVisible = true
             //获取当前orderInfo
             this.curOrderInfo = row;
         },
+        //发货按钮点击事件
+        handleDeliver(index, row) {
+            this.getProducts(row.productId)
+            this.curRowNumberNeed4Product = row.number
+            this.deliverDialogVisible = true
+        },
         //新增订单弹窗关闭
         handleCloseForAdd() {
-            this.$set(this.addForm, 'id','')
-            this.$set(this.addForm, 'orderId','')
-            this.$set(this.addForm, 'customerId','')
-            this.$set(this.addForm, 'customer','')
-            this.$set(this.addForm, 'people','')
-            this.$set(this.addForm, 'content','')
-            this.$set(this.addForm, 'phone','')
-            this.$set(this.addForm, 'address','')
-            this.$set(this.addForm, 'createDate','')
-            this.$set(this.addForm, 'status',1)
-            this.$set(this.addForm, 'amount','')
-            this.$set(this.addForm, 'deliveryProgress','')
-            this.$set(this.addForm, 'totalPayment','')
-            this.$set(this.addForm, 'note','')
-            this.orderDetailTableData=[]
+            this.$set(this.addForm, 'id', '')
+            this.$set(this.addForm, 'orderId', '')
+            this.$set(this.addForm, 'customerId', '')
+            this.$set(this.addForm, 'customer', '')
+            this.$set(this.addForm, 'people', '')
+            this.$set(this.addForm, 'content', '')
+            this.$set(this.addForm, 'phone', '')
+            this.$set(this.addForm, 'address', '')
+            this.$set(this.addForm, 'createDate', '')
+            this.$set(this.addForm, 'status', 1)
+            this.$set(this.addForm, 'amount', '')
+            this.$set(this.addForm, 'deliveryProgress', '')
+            this.$set(this.addForm, 'totalPayment', '')
+            this.$set(this.addForm, 'note', '')
+            this.orderDetailTableData = []
             this.addDialogVisible = false
             this.activeStep = 0; // 关闭对话框时重置步骤为第一步
         },
@@ -877,10 +1129,18 @@ export default {
         handleCloseForEdit() {
             this.editDialogVisible = false
         },
+        //编辑订单明细弹窗关闭
+        handleCloseForEditOrderDetail(){
+            this.editOrderDetailDialogVisible = false
+        },
         //新增明细弹窗关闭
         handleCloseForAddPayment() {
             this.$refs.payForm.resetFields()
             this.addPaymentDialogVisible = false
+        },
+        //发货弹窗关闭
+        handleCloseForDeliver() {
+            this.deliverDialogVisible = false;
         },
         //新增订单内容弹窗关闭
         handleCloseForAddOrderDetail() {
@@ -978,6 +1238,19 @@ export default {
                 }
             })
         },
+        //请求货品信息
+        getProducts(productId) {
+            http.get(`/products/${productId}`).then(({data}) => {
+                if (!data.code) {
+                    this.curProducts = data.data
+                    this.$nextTick(() => {
+                        this.$refs.tableRef.toggleAllSelection();
+                    });
+                } else {
+                    this.$message.error(data.message)
+                }
+            })
+        },
         //页码栏点击事件
         handlePage(currentPage) {
             this.pageData.currentPage = currentPage
@@ -1044,18 +1317,43 @@ export default {
             this.$set(this.orderDetailForm, 'price', productData.priceDefault)
             this.$set(this.orderDetailForm, 'numberPerBox', productData.numberPerBox)
         },
-
-
+        //处理行展开事件
+        handleExpandChange(row) {
+            http.get(`/orders/orderDetails/${row.orderId}`).then(({data}) => {
+                if (!data.code) {
+                    data.data.forEach(record => {
+                        if (record.price !== null) {
+                            record.price = record.price.toFixed(2)
+                        }
+                        if (record.amount !== null) {
+                            record.amount = record.amount.toFixed(2)
+                        }
+                    })
+                    this.$set(this.expandedRows, row.id, data.data)
+                }
+            })
+        },
+        //处理发货时的多行选择
+        handleSelectionChange(val) {
+            // console.log(val,"val")
+            let sum = 0;
+            val.forEach((obj) => {
+                if (typeof obj.number === 'number') {
+                    sum += obj.number;
+                }
+            });
+            this.curTotalSelectNumber = sum > this.curRowNumberNeed4Product ? this.curRowNumberNeed4Product : sum
+            let percentage = sum / this.curRowNumberNeed4Product * 100
+            this.percentage = percentage > 100 ? 100 : percentage;
+            console.log(this.percentage, "this.percentage");
+        },
+        handleSelectionChange4OrderDetails(selection) {
+            this.selectedItems = selection;
+        },
         next() {
             if (this.active++ > 2) this.active = 0;
         },
-        // openDialog() {
-        //     this.dialogVisible = true;
-        // },
-        // handleCloseForAdd() {
-        //     this.dialogVisible = false;
-        //     this.activeStep = 1; // 关闭对话框时重置步骤为第一步
-        // },
+
         prevStep() {
             this.activeStep--;
         },
@@ -1083,7 +1381,24 @@ export default {
                 if (this.orderDetailForm.number !== 0 && this.orderDetailForm.number !== '' && this.orderDetailForm.number !== null && this.orderDetailForm.number !== undefined)
                     this.$set(this.orderDetailForm, 'packageNumber', this.orderDetailForm.number / newPerBox)
             }
+        },
+        'editOrderDetailForm.price': function (newPrice) {
+            if (newPrice !== 0 && newPrice !== '' && newPrice !== null && newPrice !== undefined) {
+                if (this.editOrderDetailForm.number !== 0 && this.editOrderDetailForm.number !== '' && this.editOrderDetailForm.number !== null && this.editOrderDetailForm.number !== undefined)
+                    this.$set(this.editOrderDetailForm, 'amount', this.editOrderDetailForm.number * newPrice)
+            }
+        },
+        'editOrderDetailForm.number': function (newNumber) {
+            if (newNumber !== 0 && newNumber !== '' && newNumber !== null && newNumber !== undefined) {
+                if (this.editOrderDetailForm.price !== 0 && this.editOrderDetailForm.price !== '' && this.editOrderDetailForm.price !== null && this.editOrderDetailForm.price !== undefined)
+                    this.$set(this.editOrderDetailForm, 'amount', newNumber * this.editOrderDetailForm.price)
+            }
         }
+    },
+    computed: {
+        selectedItemsCount() {
+            return this.selectedItems.length; // 计算选中的项的数量
+        },
     },
     mounted() {
         this.$nextTick(() => {
