@@ -404,7 +404,7 @@
                     height="90%"
                     :data="curProducts"
                     style="width: 100%"
-                    @selection-change="handleSelectionChange"
+                    @selection-change="handleSelectionChange4DeliverProducts"
                     :default-selection="curProducts">
                     <el-table-column
                         type="selection"
@@ -461,13 +461,15 @@
                  </el-statistic>
                 <!--                <div>-->
                     <el-button @click="handleCloseForDeliver">取 消</el-button>
-                    <el-button type="primary" @click="submitForDeliver">确 定</el-button>
+                    <el-button type="primary"
+                               :disabled="percentage !== 100"
+                               @click="submitForDeliver">发 货</el-button>
                 <!--                </div>-->
             </span>
         </el-dialog>
 
         <el-dialog
-            title="编辑"
+            title="编辑订单内容"
             :visible.sync="editOrderDetailDialogVisible"
             width="30%"
             :before-close="handleCloseForEditOrderDetail">
@@ -479,13 +481,20 @@
                 label-width="80px">
 
                 <el-form-item label="产品名称" prop="productName">
-                    <el-input disabled placeholder="请输入订单内容" v-model="editOrderDetailForm.productName"></el-input>
+                    <el-input disabled placeholder="请输入订单内容"
+                              v-model="editOrderDetailForm.productName"></el-input>
                 </el-form-item>
                 <el-form-item label="产品编号" prop="productCode">
-                    <el-input disabled placeholder="请输入联系人名称" v-model="editOrderDetailForm.productCode"></el-input>
+                    <el-input disabled placeholder="请输入联系人名称"
+                              v-model="editOrderDetailForm.productCode"></el-input>
                 </el-form-item>
                 <el-form-item label="数量" prop="number">
-                    <el-input placeholder="请输入联系电话" v-model="editOrderDetailForm.number"></el-input>
+                    <el-input-number
+                        placeholder="请输入数量"
+                        :precision="0"
+                        v-model.number="editOrderDetailForm.number"
+                        size="small">
+                    </el-input-number>
                 </el-form-item>
                 <el-form-item label="单位" prop="unit">
                     <el-input placeholder="请输入地址" v-model="editOrderDetailForm.unit"></el-input>
@@ -578,10 +587,10 @@
                                 <span>{{ props.row.updateTime }}</span>
                             </el-form-item>
                             <el-form-item label="订单内容">
-                                <el-button type="primary" size="small" :disabled="selectedItemsCount === 0">一键出货
+                                <el-button type="primary" size="small" :disabled="selectedItemsCount === 0">批量出货
                                 </el-button>
                                 <el-table
-                                    :data="expandedRows[props.row.id]"
+                                    :data="expandedRows[props.row.orderId]"
                                     style="width: 100%"
                                     @selection-change="handleSelectionChange4OrderDetails">
                                     <el-table-column
@@ -653,13 +662,19 @@
                                             <el-button
                                                 size="mini"
                                                 type="success"
-                                                :disabled="props.row.isDelivered === 0"
+                                                :disabled="scope.row.isDelivered === 1"
                                                 @click="handleDeliver(scope.$index, scope.row)">发货
                                             </el-button>
                                             <el-button
                                                 size="mini"
                                                 type="primary"
                                                 @click="handleEdit4OrderDetail(scope.$index, scope.row)">编辑
+                                            </el-button>
+                                            <el-button
+                                                size="mini"
+                                                type="danger"
+                                                :disabled="scope.row.isDelivered === 1"
+                                                @click="handleDelete4OrderDetailInTable(scope.$index, scope.row)">删除
                                             </el-button>
 
                                         </template>
@@ -777,13 +792,14 @@ export default {
             addPaymentDialogVisible: false,
             editPaymentDialogVisible: false,
             addOrderDetailDialogVisible: false,
-            editOrderDetailDialogVisible:false,
+            editOrderDetailDialogVisible: false,
             showResult4AddOrder: false,
             deliverDialogVisible: false,
             expandedRows: {},
             tableData: [],
             curTotalSelectNumber: 0,
             curRowNumberNeed4Product: 0,
+            curDetailRow: 0,
             percentage: 0,
             selectedItems: [], // 存储选中的项
             orderDetailTableData: [],
@@ -854,7 +870,7 @@ export default {
                 totalPayment: '',
                 note: "",
             },
-            editOrderDetailForm:{
+            editOrderDetailForm: {
                 id: '',
                 orderId: '',
                 productId: '',
@@ -891,6 +907,10 @@ export default {
                 isDelivered: '',
                 deliveredDate: '',
                 note: ''
+            },
+            deliverForm: {
+                orderDetail: '',
+                products: []
             },
             curPaymentDetail: [
                 {}, {}, {}, {}
@@ -1015,15 +1035,14 @@ export default {
             this.$refs.editForm.validate((isValid) => {
                 if (isValid) {
                     http.put(`/orders`, this.editForm).then(({data}) => {
-                        console.log(data)
                         if (!data.code) {
-                            this.handleCloseForEdit()
                             this.$message.success(data.message)
                         } else {
-                            this.handleCloseForEdit()
+
                             this.$message.error(data.message)
                         }
                     }).finally(() => {
+                        this.handleCloseForEdit()
                         //重新加载数据
                         this.getPage();
                     })
@@ -1031,8 +1050,22 @@ export default {
             })
         },
         //编辑订单明细提交表单
-        submitForEditOrderDetail(){
-
+        submitForEditOrderDetail() {
+            this.$refs.editOrderDetailForm.validate((isValid) => {
+                if (isValid) {
+                    http.put(`/orders/orderDetails`, this.editOrderDetailForm).then(({data}) => {
+                        if (!data.code) {
+                            this.$message.success(data.message)
+                        } else {
+                            this.$message.error(data.message)
+                        }
+                    }).finally(() => {
+                        this.handleCloseForEditOrderDetail()
+                        //重新加载数据
+                        this.getOrderDetails(this.curDetailRow.orderId)
+                    })
+                }
+            })
         },
         //新增回款明细提交表单
         submitForAddPayment() {
@@ -1057,7 +1090,17 @@ export default {
         },
         //新增出货提交表单
         submitForDeliver() {
-
+            http.post(`orders/orderDetails/deliver`, this.deliverForm).then(({data}) => {
+                if (!data.code) {
+                    this.$message.success(data.message)
+                } else {
+                    this.$message.error(data.message)
+                }
+            }).finally(() => {
+                this.handleCloseForDeliver()
+                this.getOrderDetails(this.curDetailRow.orderId)
+                // this.getPage()
+            })
         },
         //查询按钮点击事件
         searchSubmit() {
@@ -1087,9 +1130,10 @@ export default {
             this.editForm = JSON.parse(JSON.stringify(row))
         },
         //订单明细编辑按钮点击事件
-        handleEdit4OrderDetail(index, row){
+        handleEdit4OrderDetail(index, row) {
             this.editOrderDetailDialogVisible = true
             this.editOrderDetailForm = JSON.parse(JSON.stringify(row))
+            this.curDetailRow = row
         },
         //回款按钮点击事件
         handlePayment(index, row) {
@@ -1104,6 +1148,8 @@ export default {
             this.getProducts(row.productId)
             this.curRowNumberNeed4Product = row.number
             this.deliverDialogVisible = true
+            this.deliverForm.orderDetail = row
+            this.curDetailRow = row
         },
         //新增订单弹窗关闭
         handleCloseForAdd() {
@@ -1130,7 +1176,7 @@ export default {
             this.editDialogVisible = false
         },
         //编辑订单明细弹窗关闭
-        handleCloseForEditOrderDetail(){
+        handleCloseForEditOrderDetail() {
             this.editOrderDetailDialogVisible = false
         },
         //新增明细弹窗关闭
@@ -1166,6 +1212,7 @@ export default {
                         this.$message.error(data.message)
                     }
                 }).finally(() => {
+                    this.getOrderDetails(row.orderId)
                     //重新加载数据
                     this.getPage();
                 })
@@ -1204,6 +1251,28 @@ export default {
                 type: 'warning'
             }).then(() => {
                 this.orderDetailTableData.splice(index, 1);
+            }).catch(() => {
+                this.$message.info('当前操作取消')
+            })
+        },
+        //在Table中删除订单明细点击事件
+        handleDelete4OrderDetailInTable(index, row) {
+            this.$confirm('此操作将删除该条目, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                http.delete(`/orders/orderDetails/${row.id}`).then(({data}) => {
+                    if (!data.code) {
+                        this.$message.success(data.message)
+                    } else {
+                        this.$message.error(data.message)
+                    }
+                }).finally(() => {
+                    //重新加载数据
+                    this.getPaymentDetail(this.curOrderInfo.orderId);
+                    this.getPage()
+                })
             }).catch(() => {
                 this.$message.info('当前操作取消')
             })
@@ -1248,6 +1317,22 @@ export default {
                     });
                 } else {
                     this.$message.error(data.message)
+                }
+            })
+        },
+        //请求订单明细
+        getOrderDetails(orderId) {
+            http.get(`/orders/orderDetails/${orderId}`).then(({data}) => {
+                if (!data.code) {
+                    data.data.forEach(record => {
+                        if (record.price !== null) {
+                            record.price = record.price.toFixed(2)
+                        }
+                        if (record.amount !== null) {
+                            record.amount = record.amount.toFixed(2)
+                        }
+                    })
+                    this.$set(this.expandedRows, orderId, data.data)
                 }
             })
         },
@@ -1319,31 +1404,34 @@ export default {
         },
         //处理行展开事件
         handleExpandChange(row) {
-            http.get(`/orders/orderDetails/${row.orderId}`).then(({data}) => {
-                if (!data.code) {
-                    data.data.forEach(record => {
-                        if (record.price !== null) {
-                            record.price = record.price.toFixed(2)
-                        }
-                        if (record.amount !== null) {
-                            record.amount = record.amount.toFixed(2)
-                        }
-                    })
-                    this.$set(this.expandedRows, row.id, data.data)
-                }
-            })
+            this.getOrderDetails(row.orderId)
+            // http.get(`/orders/orderDetails/${row.orderId}`).then(({data}) => {
+            //     if (!data.code) {
+            //         data.data.forEach(record => {
+            //             if (record.price !== null) {
+            //                 record.price = record.price.toFixed(2)
+            //             }
+            //             if (record.amount !== null) {
+            //                 record.amount = record.amount.toFixed(2)
+            //             }
+            //         })
+            //         this.$set(this.expandedRows, row.id, data.data)
+            //     }
+            // })
         },
         //处理发货时的多行选择
-        handleSelectionChange(val) {
-            // console.log(val,"val")
+        handleSelectionChange4DeliverProducts(selection) {
+            // 1.将选项内容加入表单
+            this.deliverForm.products = selection
+            // 2.处理面板显示
             let sum = 0;
-            val.forEach((obj) => {
+            selection.forEach((obj) => {
                 if (typeof obj.number === 'number') {
                     sum += obj.number;
                 }
             });
             this.curTotalSelectNumber = sum > this.curRowNumberNeed4Product ? this.curRowNumberNeed4Product : sum
-            let percentage = sum / this.curRowNumberNeed4Product * 100
+            let percentage = Math.floor(sum / this.curRowNumberNeed4Product * 100);
             this.percentage = percentage > 100 ? 100 : percentage;
             console.log(this.percentage, "this.percentage");
         },
