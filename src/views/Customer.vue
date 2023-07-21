@@ -85,7 +85,7 @@
         </el-dialog>
 
         <el-dialog
-            title="查看对账单"
+            title="导出对账单"
             :visible.sync="checkBillDialogVisible"
             width="30%"
             :before-close="handleCloseForCheckBill">
@@ -153,7 +153,7 @@
                                  :model="customerDetails[props.$index]"
                                  class="demo-table-expand">
 
-                            <el-form-item  >
+                            <el-form-item>
                                 <label style="margin-right: 0">年总成交额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
@@ -163,7 +163,7 @@
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountPerYear }}</span>
                             </el-form-item>
-                            <el-form-item >
+                            <el-form-item>
                                 <label style="margin-right: 0">现存订单额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
@@ -173,7 +173,7 @@
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountCurrent }}</span>
                             </el-form-item>
-                            <el-form-item >
+                            <el-form-item>
                                 <label style="margin-right: 0">已出货额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
@@ -183,7 +183,7 @@
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountDelivered }}</span>
                             </el-form-item>
-                            <el-form-item >
+                            <el-form-item>
                                 <label style="margin-right: 0">欠款额度</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
@@ -193,7 +193,7 @@
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountDebt4Completed }}</span>
                             </el-form-item>
-                            <el-form-item >
+                            <el-form-item>
                                 <label style="margin-right: 0">总支付金额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
@@ -203,7 +203,7 @@
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.$index].totalAmountPayment }}</span>
                             </el-form-item>
-                            <el-form-item >
+                            <el-form-item>
                                 <label style="margin-right: 0">总待支付金额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
@@ -221,14 +221,75 @@
                                 <el-table
                                     :data="expandedRows[props.row.id]"
                                     style="width: 100%"
-                                >
+                                    @expand-change="handleExpandChangeDetail">
+
+                                    <el-table-column type="expand">
+                                        <template slot-scope="props">
+                                        <el-table
+                                            :data="expandedDetailRows[props.row.orderId]"
+                                            style="width: 94%;
+                                            margin-left: 3%;
+                                            margin-right: 3%"
+                                        >
+                                            <el-table-column
+                                                prop="productName"
+                                                label="产品名称">
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="productCode"
+                                                label="产品编号">
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="packageNumber"
+                                                label="件数">
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="number"
+                                                label="数量">
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="unit"
+                                                label="单位">
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="price"
+                                                label="单价">
+                                                <template slot-scope="props">
+                                                    ¥ {{ props.row.price }}
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="amount"
+                                                label="金额">
+                                                <template slot-scope="props">
+                                                    ¥ {{ props.row.amount }}
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="isDelivered"
+                                                label="发货状态"
+                                                width="90">
+                                                <template slot-scope="props">
+                                                    <el-tag :type="status4isDelivered[props.row.isDelivered].type">{{
+                                                            status4isDelivered[props.row.isDelivered].label
+                                                        }}
+                                                    </el-tag>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="deliveredDate"
+                                                label="发货日期">
+                                            </el-table-column>
+                                            <el-table-column
+                                                prop="note"
+                                                label="备注">
+                                            </el-table-column>
+                                        </el-table>
+                                        </template>
+                                    </el-table-column>
                                     <el-table-column
                                         prop="orderId"
                                         label="订单号">
-                                    </el-table-column>
-                                    <el-table-column
-                                        prop="content"
-                                        label="订单内容">
                                     </el-table-column>
                                     <el-table-column
                                         prop="people"
@@ -237,7 +298,7 @@
                                     </el-table-column>
                                     <el-table-column
                                         prop="createDate"
-                                        label="日期"
+                                        label="下单日期"
                                         width="130">
                                     </el-table-column>
                                     <el-table-column
@@ -272,6 +333,10 @@
                                         <template slot-scope="props">
                                             ¥ {{ props.row.totalPayment }}
                                         </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="note"
+                                        label="备注">
                                     </el-table-column>
                                 </el-table>
                             </el-form-item>
@@ -362,7 +427,7 @@ export default {
         return {
             addDialogVisible: false,
             editDialogVisible: false,
-            checkBillDialogVisible:false,
+            checkBillDialogVisible: false,
             tableData: [{
                 id: '',
                 customer: '',
@@ -379,6 +444,7 @@ export default {
             }],
             customerDetails: [],// 展开行的数据
             expandedRows: {},
+            expandedDetailRows:{},
             pageData: {
                 currentPage: 1,
                 pageSize: 10,
@@ -386,11 +452,15 @@ export default {
                 customer: '',
                 address: ''
             },
-            checkForm:{
-                customerId:'',
-                customer:'',
-                startDate:'',
-                endDate:''
+            status4isDelivered: {
+                0: {type: 'warning', label: '未发货'},
+                1: {type: 'success', label: '已发货'},
+            },
+            checkForm: {
+                customerId: '',
+                customer: '',
+                startDate: '',
+                endDate: ''
             },
             editForm: {
                 id: '',
@@ -497,7 +567,7 @@ export default {
             })
         },
         //提交查看对账单请求
-        submitForCheckBill(){
+        submitForCheckBill() {
             this.$confirm('此操作会生成Excel格式订单, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -513,7 +583,7 @@ export default {
 
                 let loadingInstance = Loading.service({text: "正在处理中..."})
                 http.get(`/customers/checkBills/${this.checkForm.customerId}/?startDate=${this.checkForm.startDate}&endDate=${this.checkForm.endDate}`
-                ,{responseType: 'blob'})
+                    , {responseType: 'blob'})
                     .then(response => {
                         const url = window.URL.createObjectURL(new Blob([response.data]));
                         const link = document.createElement('a');
@@ -563,9 +633,9 @@ export default {
             this.addDialogVisible = true
         },
         //对账按钮点击事件
-        handleCheckBill(index, row){
-            this.checkForm.customerId=row.id
-            this.checkForm.customer=row.customer
+        handleCheckBill(index, row) {
+            this.checkForm.customerId = row.id
+            this.checkForm.customer = row.customer
             this.checkBillDialogVisible = true
         },
         //编辑按钮点击事件
@@ -580,8 +650,8 @@ export default {
             this.addDialogVisible = false
         },
         //对账弹窗关闭
-        handleCloseForCheckBill(){
-            this.checkBillDialogVisible=false
+        handleCloseForCheckBill() {
+            this.checkBillDialogVisible = false
         },
         //编辑弹窗关闭
         handleCloseForEdit() {
@@ -621,6 +691,23 @@ export default {
                 }
             )
         },
+        //请求订单明细
+        getOrderDetails(orderId) {
+            http.get(`/orders/orderDetails/${orderId}`).then(({data}) => {
+                if (!data.code) {
+                    data.data.forEach(record => {
+                        if (record.price !== null) {
+                            record.price = record.price.toFixed(2)
+                        }
+                        if (record.amount !== null) {
+                            record.amount = record.amount.toFixed(2)
+                        }
+                    })
+                    this.$set(this.expandedDetailRows, orderId, data.data)
+                    console.log(this.expandedDetailRows,"this.expandedDetailRows")
+                }
+            })
+        },
         //页码栏点击事件
         handlePage(currentPage) {
             this.pageData.currentPage = currentPage
@@ -655,7 +742,11 @@ export default {
                     this.$set(this.expandedRows, row.id, data.data)
                 }
             })
-        }
+        },
+        //处理内部(订单细节)行展开事件
+        handleExpandChangeDetail(row){
+            this.getOrderDetails(row.orderId)
+        },
     },
     mounted() {
         //获取页面
@@ -700,7 +791,8 @@ export default {
             bottom: 0;
             right: 20px;
         }
-        .item-tooltip{
+
+        .item-tooltip {
             width: 3%;
         }
     }

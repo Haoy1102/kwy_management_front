@@ -5,37 +5,37 @@
                 <div class="user">
                     <img src="../assets/img/logo.png" alt="">
                     <div class="userinfo">
-                        <p class="name">Admin</p>
-                        <p class="access">超级管理员</p>
+                        <p class="name">{{ this.employee.name }}</p>
+                        <p class="access">{{ this.employee.status }}</p>
                     </div>
                 </div>
                 <div class="login-info">
-                    <p>上次登陆时间: <span>2023-7-03</span></p>
-                    <p>上次登陆地点: <span>郑州</span></p>
+                    <p>上次登陆时间: <span>---以下内容待开发---</span></p>
+                    <p>上次登陆地点: <span>---以下内容待开发---</span></p>
                 </div>
             </el-card>
             <el-card style="margin-top: 20px; height: 460px;">
-<!--                <el-table-->
-<!--                    :data="tableData"-->
-<!--                    style="width: 100%">-->
-<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        prop="name"&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        label="商家">&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        prop="todayBuy"&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        label="今日购买">&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        prop="monthBuy"&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        label="本月购买">&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        prop="totalBuy"&ndash;&gt;-->
-<!--                    &lt;!&ndash;                        label="总购买">&ndash;&gt;-->
-<!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
-<!--                    <el-table-column v-for="(val,key) in tableLable" :key="key" :prop="key" :label="val"/>-->
-<!--                </el-table>-->
+                <!--                <el-table-->
+                <!--                    :data="tableData"-->
+                <!--                    style="width: 100%">-->
+                <!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        prop="name"&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        label="商家">&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        prop="todayBuy"&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        label="今日购买">&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        prop="monthBuy"&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        label="本月购买">&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    <el-table-column&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        prop="totalBuy"&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                        label="总购买">&ndash;&gt;-->
+                <!--                    &lt;!&ndash;                    </el-table-column>&ndash;&gt;-->
+                <!--                    <el-table-column v-for="(val,key) in tableLable" :key="key" :prop="key" :label="val"/>-->
+                <!--                </el-table>-->
             </el-card>
         </el-col>
         <el-col :span="16" style="padding-left: 10px">
@@ -54,10 +54,10 @@
             </el-card>
             <div class="graph">
                 <el-card style="height: 260px">
-<!--                    <div ref="echarts2" style="height: 260px"></div>-->
+                    <!--                    <div ref="echarts2" style="height: 260px"></div>-->
                 </el-card>
                 <el-card style="height: 260px">
-<!--                    <div ref="echarts3" style="height: 240px"></div>-->
+                    <!--                    <div ref="echarts3" style="height: 240px"></div>-->
                 </el-card>
             </div>
 
@@ -80,6 +80,10 @@ export default {
                 todayBuy: "今日购买",
                 monthBuy: "本月购买",
                 totalBuy: "总购买"
+            },
+            employee: {
+                name: '',
+                status: '',
             },
             countData: [
                 {
@@ -148,60 +152,31 @@ export default {
                 }
             })
         },
+        getEmployeesInfo() {
+            http.get(`/employees/sessions`).then(({data}) => {
+                if (!data.code) {
+                    if (data.data) {
+                        this.$set(this.employee, "status", "超级管理员")
+                    } else {
+                        this.$set(this.employee, "status", "管理员")
+                    }
+                } else {
+                    this.$message.error(`获取用户身份信息失败!${data.message}`)
+                }
+            })
+            http.get(`/employees`).then(({data}) => {
+                if (!data.code) {
+                    this.$set(this.employee, "name", data.data.name)
+                } else {
+                    this.$message.error(`获取用户身份信息失败!${data.message}`)
+                }
+            })
+        }
 
     },
     mounted() {
-
-        // var myChart1 = echarts.init(this.$refs.echarts1);
-        // // 指定图表的配置项和数据
-        // var option = {
-        //     legend: {},
-        //     tooltip: {},
-        //     dataset: {
-        //         // 提供一份数据。
-        //         source: [
-        //             ['product', '2015', '2016', '2017'],
-        //             ['Matcha Latte', 43.3, 85.8, 93.7],
-        //             ['Milk Tea', 83.1, 73.4, 55.1],
-        //             ['Cheese Cocoa', 86.4, 65.2, 82.5],
-        //             ['Walnut Brownie', 72.4, 53.9, 39.1]
-        //         ]
-        //     },
-        //     // 声明一个 X 轴，类目轴（category）。默认情况下，类目轴对应到 dataset 第一列。
-        //     xAxis: { type: 'category' },
-        //     // 声明一个 Y 轴，数值轴。
-        //     yAxis: {},
-        //     // 声明多个 bar 系列，默认情况下，每个系列会自动对应到 dataset 的每一列。
-        //     series: [{ type: 'bar' }, { type: 'bar' }, { type: 'bar' }]
-        // };
-        // // 使用刚指定的配置项和数据显示图表。
-        // myChart1.setOption(option);
-        //
-        // var myChart2 = echarts.init(this.$refs.echarts2);
-        // var option2 = {
-        //     xAxis: {
-        //         data: ['A', 'B', 'C', 'D', 'E']
-        //     },
-        //     yAxis: {},
-        //     series: [
-        //         {
-        //             data: [10, 22, 28, 23, 19],
-        //             type: 'line',
-        //             areaStyle: {}
-        //         },
-        //         {
-        //             data: [25, 14, 23, 35, 10],
-        //             type: 'line',
-        //             areaStyle: {
-        //                 color: '#ff0',
-        //                 opacity: 0.5
-        //             }
-        //         }
-        //     ]
-        // };
-        // myChart2.setOption(option2);
-
         this.getAcount()
+        this.getEmployeesInfo()
     },
 }
 </script>

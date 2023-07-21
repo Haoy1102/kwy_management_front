@@ -635,10 +635,6 @@
                                             ¥ {{ props.row.amount }}
                                         </template>
                                     </el-table-column>
-                                    <!--                                    <el-table-column-->
-                                    <!--                                        prop="isDelivered"-->
-                                    <!--                                        label="发货状态">-->
-                                    <!--                                    </el-table-column>-->
                                     <el-table-column
                                         prop="isDelivered"
                                         label="发货状态"
@@ -648,6 +644,17 @@
                                                     status4isDelivered[props.row.isDelivered].label
                                                 }}
                                             </el-tag>
+                                        </template>
+                                        <template slot="header" slot-scope="scope">
+                                            <div class="column-header">
+                                                <span>{{ scope.column.label }}</span>
+                                                <el-tooltip class="header-tooltip"
+                                                            effect="dark"
+                                                            :content="tooltipContent4Price"
+                                                            placement="top">
+                                                    <i class="el-icon-info"></i>
+                                                </el-tooltip>
+                                            </div>
                                         </template>
                                     </el-table-column>
                                     <el-table-column
@@ -806,6 +813,7 @@ export default {
             percentage: 0,
             selectedItems4OrderDetails: [], // 存储选中的项
             orderDetailTableData: [],
+            tooltipContent4Price:"如需退货，建议在下方订单内容处备注，并修改单价为0，金额为0。(请自行选择是否移步至产品管理界面手动添加数量，以供二次售卖。)",
             options4Customer: [],
             options4Product: [],
             options4Status: [
