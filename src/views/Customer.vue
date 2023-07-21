@@ -84,6 +84,45 @@
             </span>
         </el-dialog>
 
+        <el-dialog
+            title="查看对账单"
+            :visible.sync="checkBillDialogVisible"
+            width="30%"
+            :before-close="handleCloseForCheckBill">
+            <!--  录入时用户的表单信息-->
+            <el-form
+                ref="checkForm"
+                :model="checkForm"
+                :rules="rules"
+                label-width="auto">
+                <el-form-item label="客户" prop="customer">
+                    <el-input :disabled="true" placeholder="请输入客户公司名称" v-model="checkForm.customer"></el-input>
+                </el-form-item>
+                <el-form-item label="起始日期" prop="startDate">
+                    <el-date-picker
+                        v-model="checkForm.startDate"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="截止日期" prop="endDate">
+                    <el-date-picker
+                        v-model="checkForm.endDate"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="handleCloseForCheckBill">取 消</el-button>
+                <el-button type="primary" @click="submitForCheckBill">确 定</el-button>
+            </span>
+        </el-dialog>
+
         <div class="manage-header">
             <el-button @click="handleAdd" type="primary">
                 + 录入
@@ -280,12 +319,17 @@
                     label="备注">
                 </el-table-column>
                 <el-table-column
-                    width="150"
+                    width="210"
                     label="操作"
                 >
                     <template slot-scope="scope">
                         <el-button
                             size="mini"
+                            @click="handleCheckBill(scope.$index, scope.row)">对账
+                        </el-button>
+                        <el-button
+                            size="mini"
+                            type="primary"
                             @click="handleEdit(scope.$index, scope.row)">编辑
                         </el-button>
                         <el-button
@@ -310,6 +354,7 @@
 
 <script>
 import http from "@/utils/request";
+import {Loading} from "element-ui";
 
 export default {
     name: "Customer",
@@ -317,6 +362,7 @@ export default {
         return {
             addDialogVisible: false,
             editDialogVisible: false,
+            checkBillDialogVisible:false,
             tableData: [{
                 id: '',
                 customer: '',
@@ -339,6 +385,12 @@ export default {
                 total: 0,
                 customer: '',
                 address: ''
+            },
+            checkForm:{
+                customerId:'',
+                customer:'',
+                startDate:'',
+                endDate:''
             },
             editForm: {
                 id: '',
@@ -371,7 +423,57 @@ export default {
                 customer: [
                     {required: true, message: '请输入客户公司名称'}
                 ],
-            }
+                startDate: [
+                    {required: true, message: '请输入起始日期'}
+                ],
+                endDate: [
+                    {required: true, message: '请输入截止日期'}
+                ],
+            },
+            pickerOptions: {
+                shortcuts: [
+                    {
+                        text: '今天',
+                        onClick(picker) {
+                            picker.$emit('pick', new Date());
+                        }
+                    },
+                    {
+                        text: '本月初',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setDate(1);
+                            picker.$emit('pick', date);
+                        }
+                    },
+                    {
+                        text: '本月末',
+                        onClick(picker) {
+                            const date = new Date();
+                            const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                            picker.$emit('pick', lastDayOfMonth);
+                        }
+                    },
+                    {
+                        text: '本年初',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setMonth(0);
+                            date.setDate(1);
+                            picker.$emit('pick', date);
+                        }
+                    },
+                    {
+                        text: '本年末',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setMonth(11);
+                            date.setDate(31);
+                            picker.$emit('pick', date);
+                        }
+                    }
+                ]
+            },
         }
     },
     methods: {
@@ -393,6 +495,44 @@ export default {
                     })
                 }
             })
+        },
+        //提交查看对账单请求
+        submitForCheckBill(){
+            this.$confirm('此操作会生成Excel格式订单, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                // 获取选择的日期
+                let selectedDate = new Date(this.checkForm.endDate);
+                // 格式化日期为LocalDate格式
+                this.checkForm.endDate = selectedDate.toISOString().split('T')[0];
+                selectedDate = new Date(this.checkForm.startDate);
+                // 格式化日期为LocalDate格式
+                this.checkForm.startDate = selectedDate.toISOString().split('T')[0];
+
+                let loadingInstance = Loading.service({text: "正在处理中..."})
+                http.get(`/customers/checkBills/${this.checkForm.customerId}/?startDate=${this.checkForm.startDate}&endDate=${this.checkForm.endDate}`
+                ,{responseType: 'blob'})
+                    .then(response => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `对账_${this.checkForm.customer}_${this.checkForm.startDate}_${this.checkForm.endDate}.xlsx`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }).finally(() => {
+                    loadingInstance.close();
+                })
+                    .catch(error => {
+                        console.error('Error downloading Excel file:', error);
+                    })
+            }).catch(() => {
+                this.$message.info('当前操作取消')
+            })
+
+
         },
         //编辑客户提交表单
         submitForEdit() {
@@ -422,6 +562,12 @@ export default {
         handleAdd() {
             this.addDialogVisible = true
         },
+        //对账按钮点击事件
+        handleCheckBill(index, row){
+            this.checkForm.customerId=row.id
+            this.checkForm.customer=row.customer
+            this.checkBillDialogVisible = true
+        },
         //编辑按钮点击事件
         handleEdit(index, row) {
             this.editDialogVisible = true
@@ -432,6 +578,10 @@ export default {
         handleCloseForAdd() {
             this.$refs.addForm.resetFields()
             this.addDialogVisible = false
+        },
+        //对账弹窗关闭
+        handleCloseForCheckBill(){
+            this.checkBillDialogVisible=false
         },
         //编辑弹窗关闭
         handleCloseForEdit() {
