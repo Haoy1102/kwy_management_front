@@ -531,7 +531,7 @@ export default {
                 }
             })
         },
-        //采购提交表单
+        //生产提交表单
         submitForProduce() {
             this.$refs.produceForm.validate((isValid) => {
                 if (isValid) {

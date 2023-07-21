@@ -12,6 +12,7 @@
     "core-js": "^3.8.3",
     "echarts": "^5.4.2",
     "element-ui": "^2.15.13",
+    "file-saver": "^2.0.5",
     "js-cookie": "^3.0.5",
     "less": "^4.1.2",
     "less-loader": "^6.0.0",
