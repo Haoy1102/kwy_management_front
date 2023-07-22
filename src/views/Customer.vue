@@ -22,7 +22,7 @@
                 <el-form-item label="联系电话" prop="phone">
                     <el-input placeholder="请输入联系电话" v-model="addForm.phone"></el-input>
                 </el-form-item>
-                <el-form-item label="备用电话" prop="phone_standby">
+                <el-form-item label="备用电话" prop="phoneStandby">
                     <el-input placeholder="请输入备用电话" v-model="addForm.phoneStandby"></el-input>
                 </el-form-item>
                 <el-form-item label="默认地址" prop="address">
@@ -129,7 +129,10 @@
             </el-button>
             <el-form :inline="true" :model="pageData">
                 <el-form-item>
-                    <el-input placeholder="请输入客户名" v-model="pageData.customer"></el-input>
+                    <el-input placeholder="请输入客户公司名" v-model="pageData.customer"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input placeholder="请输入联系人" v-model="pageData.people"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-input placeholder="请输入地址" v-model="pageData.address"></el-input>
@@ -152,69 +155,45 @@
                         <el-form label-position="left"
                                  class="demo-table-expand">
                             <el-form-item>
-                                <label style="margin-right: 0">年总成交额</label>
+                                <label style="margin-right: 0">本月总成交额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
-                                            :content="`(非作废，非返场)的年总订单额度`"
+                                            :content="`本月订单(非作废，非返场)的总成交额`"
                                             placement="top">
                                     <i class="el-icon-info"></i>
                                 </el-tooltip>
-                                <span>¥ {{ customerDetails[props.row.id].totalAmountPerYear }}</span>
+                                <span>¥ {{ customerDetails[props.row.id].totalAmount }}</span>
                             </el-form-item>
                             <el-form-item>
-                                <label style="margin-right: 0">现存订单额</label>
+                                <label style="margin-right: 0">本月总交付额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
-                                            :content="`目前未完成(非作废，非返场)的订单额度）`"
-                                            placement="top">
-                                    <i class="el-icon-info"></i>
-                                </el-tooltip>
-                                <span>¥ {{ customerDetails[props.row.id].totalAmountCurrent }}</span>
-                            </el-form-item>
-                            <el-form-item>
-                                <label style="margin-right: 0">已出货额</label>
-                                <el-tooltip class="item-tooltip"
-                                            effect="dark"
-                                            :content="`目前未完成(非作废，非返场)的订单 订单金额*出货进度`"
+                                            :content="`本月订单(非作废，非返场)的出货额度`"
                                             placement="top">
                                     <i class="el-icon-info"></i>
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.row.id].totalAmountDelivered }}</span>
                             </el-form-item>
                             <el-form-item>
-                                <label style="margin-right: 0">欠款额度</label>
+                                <label style="margin-right: 0">本月总支付金额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
-                                            :content="`(待回款状态下) 现存订单额度-已回金额`"
-                                            placement="top">
-                                    <i class="el-icon-info"></i>
-                                </el-tooltip>
-                                <span>¥ {{ customerDetails[props.row.id].totalAmountDebt4Completed }}</span>
-                            </el-form-item>
-                            <el-form-item>
-                                <label style="margin-right: 0">总支付金额</label>
-                                <el-tooltip class="item-tooltip"
-                                            effect="dark"
-                                            :content="`目前未完成(非作废，非返场)的订单 总支付金额`"
+                                            :content="`本月订单(非作废，非返场)的总已回金额`"
                                             placement="top">
                                     <i class="el-icon-info"></i>
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.row.id].totalAmountPayment }}</span>
                             </el-form-item>
                             <el-form-item>
-                                <label style="margin-right: 0">总待支付金额</label>
+                                <label style="margin-right: 0">本月欠款金额</label>
                                 <el-tooltip class="item-tooltip"
                                             effect="dark"
-                                            :content="`(非作废，非返场) 现存订单额度-总支付金额`"
+                                            :content="`本月订单(非作废，非返场)总交付额-已回金额`"
                                             placement="top">
                                     <i class="el-icon-info"></i>
                                 </el-tooltip>
                                 <span>¥ {{ customerDetails[props.row.id].totalAmountDebt }}</span>
                             </el-form-item>
-                            <el-form-item label="备注">
-                                <span>{{ props.row.note }}</span>
-                            </el-form-item>
-
                             <el-form-item label="订单记录-(只显示一年记录，详细内容请至订单模块)">
                                 <el-table
                                     :data="expandedRows[props.row.id]"
@@ -319,6 +298,13 @@
                                         label="订单金额">
                                         <template slot-scope="props">
                                             ¥ {{ props.row.amount }}
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="totalDelivered"
+                                        label="交付金额">
+                                        <template slot-scope="props">
+                                            ¥ {{ props.row.totalDelivered }}
                                         </template>
                                     </el-table-column>
                                     <el-table-column
@@ -436,7 +422,8 @@ export default {
                 pageSize: 10,
                 total: 0,
                 customer: '',
-                address: ''
+                people: '',
+                address: '',
             },
             status4isDelivered: {
                 0: {type: 'warning', label: '未发货'},
@@ -665,7 +652,7 @@ export default {
         },
         //获取页面
         getPage() {
-            http.get(`/customers/${this.pageData.currentPage}/${this.pageData.pageSize}/?customer=${this.pageData.customer}&address=${this.pageData.address}`).then(({data}) => {
+            http.get(`/customers/${this.pageData.currentPage}/${this.pageData.pageSize}/?people=${this.pageData.people}&customer=${this.pageData.customer}&address=${this.pageData.address}`).then(({data}) => {
                     if (!data.code) {
                         this.tableData = data.data.records
                         this.pageData.total = data.data.total
@@ -703,10 +690,8 @@ export default {
             // if (index !== -1) {
             http.get(`/customers/${row.id}`).then(({data}) => {
                 if (!data.code) {
-                    data.data.totalAmountPerYear = data.data.totalAmountPerYear !== null ? data.data.totalAmountPerYear.toFixed(2) : null;
-                    data.data.totalAmountCurrent = data.data.totalAmountCurrent !== null ? data.data.totalAmountCurrent.toFixed(2) : null;
+                    data.data.totalAmount = data.data.totalAmount !== null ? data.data.totalAmount.toFixed(2) : null;
                     data.data.totalAmountDelivered = data.data.totalAmountDelivered !== null ? data.data.totalAmountDelivered.toFixed(2) : null;
-                    data.data.totalAmountDebt4Completed = data.data.totalAmountDebt4Completed !== null ? data.data.totalAmountDebt4Completed.toFixed(2) : null;
                     data.data.totalAmountPayment = data.data.totalAmountPayment !== null ? data.data.totalAmountPayment.toFixed(2) : null;
                     data.data.totalAmountDebt = data.data.totalAmountDebt !== null ? data.data.totalAmountDebt.toFixed(2) : null;
                     this.$set(this.customerDetails, row.id, data.data);
@@ -721,6 +706,9 @@ export default {
                         }
                         if (record.totalPayment !== null) {
                             record.totalPayment = record.totalPayment.toFixed(2)
+                        }
+                        if (record.totalDelivered !== null) {
+                            record.totalDelivered = record.totalDelivered.toFixed(2)
                         }
                     })
                     this.$set(this.expandedRows, row.id, data.data)

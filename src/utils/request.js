@@ -1,5 +1,6 @@
 import axios from "axios";
 import router from "@/router";
+import Cookie from "js-cookie";
 
 
 const http = axios.create({
@@ -21,12 +22,13 @@ http.interceptors.request.use(function (config) {
 http.interceptors.response.use(
     response => {
         //如果接口返回token，替换本地旧token
-        if (response.headers.token) {
-            sessionStorage.setItem("token", response.headers.token);
-        }
+        // if (response.headers.token) {
+        //     sessionStorage.setItem("token", response.headers.token);
+        // }
         console.log(response)
         //自定义设置后台返回code对应的响应方式
         if (response.data.code === 41015) { // 未登录或登录超时
+            Cookie.remove('employeeId')
             if (router.currentRoute.path !== '/login') { // 当前页面不是登录页面
                 router.push('login'); // 替换为你的首页路由路径
             }

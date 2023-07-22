@@ -139,7 +139,7 @@
         </el-dialog>
 
         <el-dialog
-            title="采购"
+            title="生产"
             :visible.sync="produceDialogVisible"
             width="30%"
             :before-close="handleCloseForProduce">
@@ -452,6 +452,7 @@ export default {
                 number: 0.00,
                 location: '',
                 producedDate: '',
+                note:""
             },
             tagLabels: {
                 1: {type: '', label: '正常'},

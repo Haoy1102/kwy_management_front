@@ -588,7 +588,10 @@
                     <el-input placeholder="请输入订单号" v-model="pageData.orderId"></el-input>
                 </el-form-item>
                 <el-form-item>
-                    <el-input placeholder="请输入客户名" v-model="pageData.customer"></el-input>
+                    <el-input placeholder="请输入客户公司名" v-model="pageData.customer"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input placeholder="请输入联系人" v-model="pageData.people"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-input placeholder="请输入地址" v-model="pageData.address"></el-input>
@@ -774,6 +777,13 @@
                     </template>
                 </el-table-column>
                 <el-table-column
+                    prop="totalDelivered"
+                    label="交付金额">
+                    <template slot-scope="props">
+                        ¥ {{ props.row.totalDelivered }}
+                    </template>
+                </el-table-column>
+                <el-table-column
                     prop="deliveryProgress"
                     label="交付进度"
                     width="90">
@@ -899,6 +909,7 @@ export default {
                 customer: '',
                 address: '',
                 orderId: '',
+                people:''
             },
             addForm: {
                 id: 0,
@@ -1455,12 +1466,13 @@ export default {
         },
         //获取页面
         getPage() {
-            http.get(`/orders/${this.pageData.currentPage}/${this.pageData.pageSize}/?customer=${this.pageData.customer}&address=${this.pageData.address}&orderId=${this.pageData.orderId}`)
+            http.get(`/orders/${this.pageData.currentPage}/${this.pageData.pageSize}/?customer=${this.pageData.customer}&people=${this.pageData.people}&address=${this.pageData.address}&orderId=${this.pageData.orderId}`)
                 .then(({data}) => {
                         if (!data.code) {
                             data.data.records.forEach(record => {
                                 record.amount = record.amount.toFixed(2)
                                 record.totalPayment = record.totalPayment.toFixed(2)
+                                record.totalDelivered = record.totalDelivered.toFixed(2)
                             });
                             this.tableData = data.data.records
                             this.pageData.total = data.data.total

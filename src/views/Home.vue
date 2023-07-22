@@ -88,35 +88,43 @@ export default {
             countData: [
                 {
                     name: "totalAmount",
-                    lable: '近3月订单总额',
+                    lable: '本月订单总金额',
                     value: null,
                     icon: "success",
                     color: "#2ec7c9",
                 },
+                // {
+                //     name: "totalAmountCurrent",
+                //     lable: '现存订单额',
+                //     value: null,
+                //     icon: "star-on",
+                //     color: "#ffb980",
+                // },
                 {
-                    name: "totalAmountCurrent",
-                    lable: '现存订单额',
+                    name: "totalAmoutPayment",
+                    lable: '本月总交付金额',
                     value: null,
                     icon: "star-on",
                     color: "#ffb980",
                 },
+                // 本月总入账额
                 {
-                    name: "totalAmountDelivered",
-                    lable: "已出货金额",
+                    name: "totalAmoutPayment",
+                    lable: "本月总入账金额",
                     value: null,
                     icon: "s-goods",
                     color: "#5ab1ef",
                 },
                 {
-                    name: "totalAmountNoDelivered",
-                    lable: "未出货金额",
+                    name: "totalAmoutExpend",
+                    lable: "总出账金额",
                     value: null,
                     icon: "success",
                     color: "#2ec7c9",
                 },
                 {
-                    name: "totalAmountDebt",
-                    lable: "待入账总金额",
+                    name: "totalAssetsProduct",
+                    lable: "产品总资产",
                     value: null,
                     icon: "star-on",
                     color: "#ffb980",
@@ -133,22 +141,27 @@ export default {
     },
     methods: {
         getAcount() {
-            let month = 3
-            http.get(`/accounts/${month}`).then(({data}) => {
+            // let month = 1
+            http.get(`/accounts`).then(({data}) => {
                 if (!data.code) {
                     data.data.totalAmount = data.data.totalAmount !== null ? data.data.totalAmount.toFixed(2) : null;
-                    data.data.totalAmountCurrent = data.data.totalAmountCurrent !== null ? data.data.totalAmountCurrent.toFixed(2) : null;
+                    // data.data.totalAmountCurrent = data.data.totalAmountCurrent !== null ? data.data.totalAmountCurrent.toFixed(2) : null;
                     data.data.totalAmountDelivered = data.data.totalAmountDelivered !== null ? data.data.totalAmountDelivered.toFixed(2) : null;
-                    data.data.totalAmountNoDelivered = data.data.totalAmountNoDelivered !== null ? data.data.totalAmountNoDelivered.toFixed(2) : null;
-                    data.data.totalAmountDebt = data.data.totalAmountDebt !== null ? data.data.totalAmountDebt.toFixed(2) : null;
+                    // data.data.totalAmountNoDelivered = data.data.totalAmountNoDelivered !== null ? data.data.totalAmountNoDelivered.toFixed(2) : null;
+                    // data.data.totalAmountDebt = data.data.totalAmountDebt !== null ? data.data.totalAmountDebt.toFixed(2) : null;
                     data.data.totalAssetsMaterial = data.data.totalAssetsMaterial !== null ? data.data.totalAssetsMaterial.toFixed(2) : null;
+
+                    data.data.totalAmoutExpend = data.data.totalAmoutExpend !== null ? data.data.totalAmoutExpend.toFixed(2) : null;
+                    data.data.totalAmoutPayment = data.data.totalAmoutPayment !== null ? data.data.totalAmoutPayment.toFixed(2) : null;
+                    data.data.totalAssetsProduct = data.data.totalAssetsProduct !== null ? data.data.totalAssetsProduct.toFixed(2) : null;
+
                     this.countData = this.countData.map(item => {
                         // 在这里根据你的需求修改value的值
                         item.value = data.data[item.name]; // 使用data中对应的值来替换
                         return item;
                     });
                 } else {
-                    this.$message.error(data.messages)
+                    this.$message.error("暂无数据")
                 }
             })
         },

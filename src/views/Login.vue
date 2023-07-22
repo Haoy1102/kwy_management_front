@@ -55,6 +55,10 @@ export default {
                     http.post('/employees/login',this.form).then(({data}) => {
                         // console.log(data)
                         if (!data.code) {
+                            var expirationDate = new Date();
+                            expirationDate.setFullYear(expirationDate.getFullYear() + 10);
+                            Cookie.set('employeeId', data.data.id, { expires: expirationDate });
+                            // Cookie.set('employeeName',data.data.name)
                             this.$router.push('/home')
                         } else {
                             this.$message.error(data.message);

@@ -41,8 +41,8 @@ export default {
                         this.$message.success(data.message)
                     }
                 })
-                Cookie.remove('token')
-                Cookie.remove('menu')
+                Cookie.remove('employeeId')
+                // Cookie.remove('menu')
                 this.$router.push('login')
             }
         },

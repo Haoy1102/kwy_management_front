@@ -30,7 +30,7 @@
         <div class="manage-header">
             <el-form :inline="true" :model="pageData">
                 <el-form-item>
-                    <el-input placeholder="请输入id" v-model="pageData.id"></el-input>
+                    <el-input placeholder="请输入操作ID" v-model="pageData.id"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-input placeholder="请输入产品名称" v-model="pageData.productName"></el-input>

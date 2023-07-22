@@ -337,6 +337,7 @@ export default {
                         document.body.removeChild(link);
                     }).finally(() => {
                     loadingInstance.close();
+                    this.handleCloseForOrderData()
                 })
                     .catch(error => {
                         console.error('Error downloading Excel file:', error);
