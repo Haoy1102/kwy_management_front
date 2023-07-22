@@ -155,10 +155,7 @@
                 <el-table-column type="expand">
                     <template slot-scope="props">
                         <el-form label-position="left" class="demo-table-expand">
-                            <el-form-item label="备注">
-                                <span>{{ props.row.note }}</span>
-                            </el-form-item>
-                            <el-form-item label="该批次产品操作记录-(只显示最多十条，详细内容请至批次记录模块查询)">
+                            <el-form-item label="批次记录-(至多显示十条，详细内容请至批次记录模块查询)">
                                 <el-table
                                     :data="expandedRows[props.row.id]"
                                     style="width: 100%"
@@ -225,11 +222,13 @@
                 </el-table-column>
                 <el-table-column
                     prop="batchId"
-                    label="批次号">
+                    label="批次号"
+                    width="80">
                 </el-table-column>
                 <el-table-column
                     prop="productName"
-                    label="产品名称">
+                    label="产品名称"
+                    width="150px">
                 </el-table-column>
                 <el-table-column
                     prop="productCode"
@@ -241,7 +240,8 @@
                 </el-table-column>
                 <el-table-column
                     prop="unit"
-                    label="单位">
+                    label="单位"
+                    width="50">
                 </el-table-column>
                 <el-table-column
                     prop="location"
@@ -249,7 +249,8 @@
                 </el-table-column>
                 <el-table-column
                     prop="producedDate"
-                    label="生产日期">
+                    label="生产日期"
+                    width="130">
                 </el-table-column>
                 <el-table-column
                     prop="status"
@@ -265,7 +266,7 @@
                     label="备注">
                 </el-table-column>
                 <el-table-column
-                    width="210"
+                    width="150"
                     label="操作">
                     <template slot-scope="scope">
                         <el-button

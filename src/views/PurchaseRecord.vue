@@ -1,7 +1,7 @@
 <template>
     <div class="manage">
         <el-dialog
-            title="采购"
+            title="采购信息"
             :visible.sync="editDialogVisible"
             width="30%"
             :before-close="handleCloseForEdit">
@@ -29,7 +29,10 @@
         <div class="manage-header">
             <el-form :inline="true" :model="pageData">
                 <el-form-item>
-                    <el-input placeholder="请输入货号" v-model="pageData.id"></el-input>
+                    <el-input placeholder="请输入操作ID" v-model="pageData.id"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input placeholder="请输入货号" v-model="pageData.goodsId"></el-input>
                 </el-form-item>
                 <el-form-item>
                     <el-input placeholder="请输入品类名" v-model="pageData.category"></el-input>
@@ -50,9 +53,30 @@
                 :data="tableData"
                 style="width: 100%"
             >
+                <el-table-column type="expand">
+                    <template slot-scope="props">
+                        <el-form label-position="left" class="demo-table-expand">
+                            <el-form-item label="仓储 ">
+                                <span>{{ props.row.location }}</span>
+                            </el-form-item>
+                            <el-form-item label="生产日期 ">
+                                <span>{{ props.row.producedDate }}</span>
+                            </el-form-item>
+                            <el-form-item label="操作时间 ">
+                                <span>{{ props.row.createTime }}</span>
+                            </el-form-item>
+                        </el-form>
+                    </template>
+                </el-table-column>
                 <el-table-column
                     prop="id"
-                    label="货号ID">
+                    label="ID"
+                    width="60">
+                </el-table-column>
+                <el-table-column
+                    prop="goodsId"
+                    label="货号"
+                    width="60">
                 </el-table-column>
                 <el-table-column
                     prop="category"
@@ -81,14 +105,6 @@
                     </template>
                 </el-table-column>
                 <el-table-column
-                    prop="location"
-                    label="仓储">
-                </el-table-column>
-                <el-table-column
-                    prop="producedDate"
-                    label="生产日期">
-                </el-table-column>
-                <el-table-column
                     label="状态">
                     <template slot-scope="props">
                         <el-tag :type="statusLabels[props.row.status].type">
@@ -99,6 +115,10 @@
                 <el-table-column
                     prop="createDate"
                     label="订单日期">
+                </el-table-column>
+                <el-table-column
+                    prop="createUser"
+                    label="操作人">
                 </el-table-column>
                 <el-table-column
                     prop="note"
@@ -146,6 +166,7 @@ export default {
                 pageSize: 10,
                 total: 0,
                 id: '',
+                goodsId:'',
                 category: '',
                 supplier: ''
             },
@@ -209,7 +230,7 @@ export default {
         },
         //获取页面
         getPage() {
-            http.get(`/purchase/${this.pageData.currentPage}/${this.pageData.pageSize}/?id=${this.pageData.id}&category=${this.pageData.category}&supplier=${this.pageData.supplier}`).then(({data}) => {
+            http.get(`/purchase/${this.pageData.currentPage}/${this.pageData.pageSize}/?id=${this.pageData.id}&id=${this.pageData.goodsId}&goodsId=${this.pageData.goodsId}&category=${this.pageData.category}&supplier=${this.pageData.supplier}`).then(({data}) => {
                     if (!data.code) {
                         data.data.records.forEach(record => {
                             if (record.price !== null) {
@@ -266,19 +287,11 @@ export default {
         position: relative;
         height: calc(100% - 62px);
 
-        .demo-table-expand {
-            font-size: 0;
-        }
-
-        .demo-table-expand label {
-            width: 90px;
-            color: #99a9bf;
-        }
-
         .demo-table-expand .el-form-item {
-            margin-right: 0;
+            margin-left: 5%;
+            margin-right: 5%;
             margin-bottom: 0;
-            width: 50%;
+            width: 90%;
         }
 
         .pager {

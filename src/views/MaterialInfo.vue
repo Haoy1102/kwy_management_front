@@ -12,8 +12,18 @@
                 :model="addForm"
                 :rules="rules"
                 label-width="auto">
-                <el-form-item label="品类" prop="category">
-                    <el-input placeholder="请输入品类名" v-model="addForm.category"></el-input>
+                <el-form-item label="品类" prop="categoryId">
+                    <el-select v-model="addForm.categoryId" filterable placeholder="请选择货品"
+                               @visible-change="selectMaterialClick"
+                               @change="(categoryId) => selectMaterialChange(categoryId)">
+                        <el-option
+                            v-for="item in options4Materials"
+                            :key="item.id"
+                            :label="item.category"
+                            :value="item.id"
+                        >
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="货源" prop="supplier">
                     <el-input placeholder="请输入供货商名" v-model="addForm.supplier"></el-input>
@@ -98,25 +108,22 @@
                 <el-form-item label="数量" prop="number">
                     <el-input-number
                         placeholder="例: 5.3"
-                        :precision="1"
-                        v-model.number="purchaseForm.number"
-                        size="small">
+                        :precision="0"
+                        v-model.number="purchaseForm.number">
                     </el-input-number>
                 </el-form-item>
                 <el-form-item label="单价" prop="price">
                     <el-input-number
                         placeholder="例:100.00"
                         :precision="2"
-                        v-model.number="purchaseForm.price"
-                        size="small">
+                        v-model.number="purchaseForm.price">
                     </el-input-number>
                 </el-form-item>
                 <el-form-item label="总金额" prop="totalAmount">
                     <el-input-number
                         placeholder="例:2000.00"
                         :precision="2"
-                        v-model.number="purchaseForm.totalAmount"
-                        size="small">
+                        v-model.number="purchaseForm.totalAmount">
                     </el-input-number>
                 </el-form-item>
                 <el-form-item label="仓储" prop="location">
@@ -185,17 +192,18 @@
                 <el-table-column type="expand">
                     <template slot-scope="props">
                         <el-form label-position="left" class="demo-table-expand">
-                            <el-form-item label="备注">
-                                <span>{{ props.row.note }}</span>
-                            </el-form-item>
-                            <el-form-item label="采购记录-(只显示最多十条，详细内容请至采购模块查询)">
+                            <el-form-item label="采购记录-(至多显示十条，详细内容请至采购记录模块查询)">
                                 <el-table
                                     :data="expandedRows[props.row.id]"
                                     style="width: 100%"
                                     >
                                     <el-table-column
                                         prop="id"
-                                        label="货号ID">
+                                        label="ID">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="goodsId"
+                                        label="货号">
                                     </el-table-column>
                                     <el-table-column
                                         prop="number"
@@ -210,7 +218,7 @@
                                     </el-table-column>
                                     <el-table-column
                                         prop="totalAmount"
-                                        label="总价">
+                                        label="总金额">
                                         <template slot-scope="props">
                                             ¥ {{ props.row.totalAmount }}
                                         </template>
@@ -222,6 +230,18 @@
                                                 {{ statusLabels[props.row.status].label }}
                                             </el-tag>
                                         </template>
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="createDate"
+                                        label="订单日期">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="createUser"
+                                        label="操作人">
+                                    </el-table-column>
+                                    <el-table-column
+                                        prop="note"
+                                        label="备注">
                                     </el-table-column>
                                 </el-table>
                             </el-form-item>
@@ -249,6 +269,10 @@
                     <template slot-scope="props">
                         ¥ {{ props.row.latestPrice }}
                     </template>
+                </el-table-column>
+                <el-table-column
+                    prop="note"
+                    label="备注">
                 </el-table-column>
                 <el-table-column
                     width="210"
@@ -295,6 +319,7 @@ export default {
             tableData: [],
             tableData4Purchase: [{}, {}, {}, {}, {}, {}, {}, {}],
             expandedRows: {},
+            options4Materials: [],
             options4Status: [
                 {
                     label: "新鲜",
@@ -336,6 +361,7 @@ export default {
             },
             purchaseForm: {
                 materialInfoId: '',
+                categoryId: '',
                 category: '',
                 supplier: '',
                 number: 0.00,
@@ -344,9 +370,13 @@ export default {
                 location: '',
                 producedDate: '',
                 status: 1,
-                createDate: ''
+                createDate: '',
+                note:''
             },
             rules: {
+                categoryId: [
+                    {required: true, message: '请输入品类名'}
+                ],
                 category: [
                     {required: true, message: '请输入品类名'}
                 ],
@@ -450,6 +480,7 @@ export default {
         handlePurchase(index, row) {
             this.purchaseDialogVisible = true
             this.$set(this.purchaseForm, 'materialInfoId', row.id)
+            this.$set(this.purchaseForm, 'categoryId', row.categoryId)
             this.$set(this.purchaseForm, 'category', row.category)
             this.$set(this.purchaseForm, 'supplier', row.supplier)
             this.$set(this.purchaseForm, 'price', row.defaultPrice)
@@ -539,7 +570,24 @@ export default {
                     this.$set(this.expandedRows, materialInfoId, data.data.records)
                 }
             })
-        }
+        },
+        //弹出客户选择选项
+        selectMaterialClick() {
+            http.get("/materials/overviews").then(({data}) => {
+                if (!data.code) {
+                    this.options4Materials = data.data
+                } else {
+                    this.$message.error(data.message)
+                }
+            })
+        },
+        //选择客户后自动填充
+        selectMaterialChange(categoryId) {
+            let materialData = {}
+            materialData = this.options4Materials.find(item => item.id === categoryId)
+            this.$set(this.addForm,'categoryId',materialData.id)
+            this.$set(this.addForm,'category',materialData.category)
+        },
     },
     computed: {
         item4Purchase() {

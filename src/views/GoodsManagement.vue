@@ -13,17 +13,14 @@
                 :rules="rules"
                 label-width="auto">
                 <p style="margin-bottom: 10px;">（数据录入后，请使用采购模块进行货品入库）</p>
-                <el-form-item label="自定义货号" prop="goodsId">
-                    <el-input placeholder="请输入0-9999的数字" v-model="addForm.goodsId"></el-input>
-                </el-form-item>
-                <el-form-item label="货品" prop="materialInfo">
-                    <el-select v-model="addForm.materialInfo" filterable placeholder="请选择货品"
+                <el-form-item label="品类" prop="categoryId">
+                    <el-select v-model="addForm.categoryId" filterable placeholder="请选择货品"
                                @visible-change="selectMaterialClick"
-                               @change="(materialInfoId) => selectMaterialChange(materialInfoId)">
+                               @change="(categoryId) => selectMaterialChange(categoryId)">
                         <el-option
                             v-for="item in options4Materials"
                             :key="item.id"
-                            :label="`${item.category}-${item.supplier}`"
+                            :label="item.category"
                             :value="item.id"
                         >
                         </el-option>
@@ -32,13 +29,15 @@
                 <el-form-item label="数量" prop="number">
                     <el-input-number
                         placeholder="例：10.7"
-                        :precision="1"
+                        :precision="0"
                         v-model.number="addForm.number"
                         size="small">
                     </el-input-number>
                 </el-form-item>
                 <el-form-item label="仓储" prop="location">
-                    <el-input placeholder="请输入仓储位置" v-model="addForm.location"></el-input>
+                    <el-input placeholder="请输入仓储位置"
+                              v-model="addForm.location">
+                    </el-input>
                 </el-form-item>
                 <el-form-item label="生产日期" prop="producedDate">
                     <el-date-picker
@@ -76,47 +75,36 @@
         </el-dialog>
 
         <el-dialog
-            title="编辑"
-            :visible.sync="editDialogVisible"
+            title="编辑货品"
+            :visible.sync="editGoodsDialogVisible"
             width="30%"
-            :before-close="handleCloseForEdit">
-            <!--  录入时用户的表单信息-->
+            :before-close="handleCloseForEditGoods">
             <el-form
-                ref="editForm"
-                :model="editForm"
+                ref="editGoodsForm"
+                :model="editGoodsForm"
                 :rules="rules"
                 label-width="auto">
                 <el-form-item label="货号" prop="goodsId">
-                    <el-input disabled placeholder="请输入0-9999的数字" v-model="editForm.goodsId"></el-input>
+                    <el-input disabled  v-model="editGoodsForm.goodsId"></el-input>
                 </el-form-item>
-                <el-form-item label="货品" prop="materialInfo">
-                    <el-select disabled v-model="editForm.materialInfo" filterable placeholder="请选择货品"
-                               @visible-change="selectMaterialClick"
-                               @change="(materialInfoId) => selectMaterialChange(materialInfoId)">
-                        <el-option
-                            v-for="item in options4Materials"
-                            :key="item.id"
-                            :label="`${item.category}-${item.supplier}`"
-                            :value="item.id"
-                        >
-                        </el-option>
+                <el-form-item label="货品" >
+                    <el-select disabled v-model="editGoodsForm.materialInfo" >
                     </el-select>
                 </el-form-item>
                 <el-form-item label="数量" prop="number">
                     <el-input-number
                         placeholder="例：10.7"
-                        disabled
                         :precision="1"
-                        v-model.number="editForm.number"
+                        v-model.number="editGoodsForm.number"
                         size="small">
                     </el-input-number>
                 </el-form-item>
                 <el-form-item label="仓储" prop="location">
-                    <el-input placeholder="请输入仓储位置" v-model="editForm.location"></el-input>
+                    <el-input placeholder="请输入仓储位置" v-model="editGoodsForm.location"></el-input>
                 </el-form-item>
                 <el-form-item label="生产日期" prop="producedDate">
                     <el-date-picker
-                        v-model="editForm.producedDate"
+                        v-model="editGoodsForm.producedDate"
                         align="right"
                         type="date"
                         placeholder="选择日期"
@@ -124,7 +112,7 @@
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="状态" prop="status">
-                    <el-select v-model="editForm.status" filterable placeholder="">
+                    <el-select v-model="editGoodsForm.status" filterable placeholder="">
                         <el-option
                             v-for="item in options4Status"
                             :key="item.id"
@@ -139,13 +127,13 @@
                         type="textarea"
                         :rows="3"
                         placeholder="请输入备注内容"
-                        v-model="editForm.note">
+                        v-model="editGoodsForm.note">
                     </el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="handleCloseForEdit">取 消</el-button>
-                <el-button type="primary" @click="submitForEdit">确 定</el-button>
+                <el-button @click="handleCloseForEditGoods">取 消</el-button>
+                <el-button type="primary" @click="submitForEditGoods">确 定</el-button>
             </span>
         </el-dialog>
 
@@ -154,7 +142,7 @@
             :visible.sync="outDialogVisible"
             width="30%"
             :before-close="handleCloseForOut">
-            <!--  采购的表单信息-->
+            <!--  出库的表单信息-->
             <el-form
                 ref="outForm"
                 :model="outForm"
@@ -163,10 +151,10 @@
                 <el-form-item label="品类" prop="category">
                     <el-input disabled v-model="outForm.category"></el-input>
                 </el-form-item>
-                <el-form-item label="货源" prop="supplier">
+                <el-form-item label="货源" >
                     <el-input disabled v-model="outForm.supplier"></el-input>
                 </el-form-item>
-                <el-form-item label="数量" prop="number">
+                <el-form-item label="数量" prop="operateNumber">
                     <el-input-number
                         placeholder="例: 5.3"
                         :precision="1"
@@ -174,7 +162,7 @@
                         size="small">
                     </el-input-number>
                 </el-form-item>
-                <el-form-item label="备注" prop="note">
+                <el-form-item label="操作备注" prop="note">
                     <el-input
                         type="textarea"
                         :rows="3"
@@ -220,17 +208,14 @@
                 <el-table-column type="expand">
                     <template slot-scope="props">
                         <el-form label-position="left" class="demo-table-expand">
-                            <el-form-item label="备注">
-                                <span>{{ props.row.note }}</span>
-                            </el-form-item>
-                            <el-form-item label="库存记录-(只显示最多十条，详细内容请至采购模块查询)">
+                            <el-form-item label="库存记录-(至多显示十条，详细内容请至库存记录模块查询)">
                                 <el-table
                                     :data="expandedRows[props.row.id]"
                                     style="width: 100%">
                                     <el-table-column
                                         width="100"
                                         prop="id"
-                                        label="操作记录ID">
+                                        label="ID">
                                     </el-table-column>
                                     <el-table-column
                                         label="操作类型">
@@ -241,21 +226,16 @@
                                         </template>
                                     </el-table-column>
                                     <el-table-column
+                                        prop="originNumber"
+                                        label="原量">
+                                    </el-table-column>
+                                    <el-table-column
                                         prop="operateNumber"
                                         label="操作数量">
                                     </el-table-column>
                                     <el-table-column
                                         prop="remainNumber"
-                                        label="本批余量">
-                                    </el-table-column>
-                                    <el-table-column
-                                        width="180"
-                                        prop="updateTime"
-                                        label="操作时间">
-                                    </el-table-column>
-                                    <el-table-column
-                                        prop="location"
-                                        label="仓储">
+                                        label="余量">
                                     </el-table-column>
                                     <el-table-column
                                         label="状态">
@@ -265,6 +245,16 @@
                                             </el-tag>
                                         </template>
                                     </el-table-column>
+                                    <el-table-column
+                                        prop="createUser"
+                                        label="操作人">
+                                    </el-table-column>
+                                    <el-table-column
+                                        width="180"
+                                        prop="updateTime"
+                                        label="操作时间">
+                                    </el-table-column>
+
                                     <el-table-column
                                         prop="note"
                                         label="备注">
@@ -290,17 +280,6 @@
                 <el-table-column
                     prop="number"
                     label="余量">
-                    <template slot="header" slot-scope="scope">
-                        <div class="column-header">
-                            <span>{{ scope.column.label }}</span>
-                            <el-tooltip class="header-tooltip"
-                                        effect="dark"
-                                        :content="tooltipContent4Number"
-                                        placement="top">
-                                <i class="el-icon-info"></i>
-                            </el-tooltip>
-                        </div>
-                    </template>
                 </el-table-column>
                 <el-table-column
                     prop="location"
@@ -326,7 +305,7 @@
                     label="备注">
                 </el-table-column>
                 <el-table-column
-                    width="150"
+                    width="210"
                     label="操作">
                     <template slot-scope="scope">
                         <el-button
@@ -336,7 +315,12 @@
                         <el-button
                             size="mini"
                             type="primary"
-                            @click="handleEdit(scope.$index, scope.row)">编辑
+                            @click="handleEdit4Goods(scope.$index, scope.row)">编辑
+                        </el-button>
+                        <el-button
+                            size="mini"
+                            type="danger"
+                            @click="handleDelete4Goods(scope.$index, scope.row)">删除
                         </el-button>
                     </template>
                 </el-table-column>
@@ -360,9 +344,9 @@ export default {
     data() {
         return {
             addDialogVisible: false,
-            editDialogVisible: false,
+            editGoodsDialogVisible: false,
             outDialogVisible: false,
-            tooltipContent4Number:"只显示余量不为0的数据",
+            // tooltipContent4Number:"只显示余量不为0的数据",
             expandedRows: {},
             tableData: [],
             options4Materials: [],
@@ -386,9 +370,11 @@ export default {
                 3: {type: 'danger', label: '尽快使用'},
             },
             operateTypeLabels: {
-                1: {type: 'success', label: '入库'},
+                1: {type: 'success', label: '采购'},
                 2: {type: 'primary', label: '出库'},
                 3: {type: 'info', label: '手工录入'},
+                4: {type: 'info', label: '手动调整'},
+                5: {type: 'danger', label: '删除'},
             },
             pageData: {
                 currentPage: 1,
@@ -398,25 +384,23 @@ export default {
                 supplier: '',
                 goodsId: ''
             },
-            editForm: {
+            addForm: {
                 id: '',
-                materialInfo:"",
-                materialInfoId: '',
-                goodsId: '',
+                categoryId: '',
                 category: '',
-                supplier: '',
                 number: '',
                 location: '',
                 producedDate: '',
                 status: 1,
                 note: '',
             },
-            addForm: {
+            editGoodsForm: {
                 id: '',
+                goodsId: '',
+                categoryId: '',
+                category: '',
                 materialInfo:"",
                 materialInfoId: '',
-                goodsId: '',
-                category: '',
                 supplier: '',
                 number: '',
                 location: '',
@@ -425,21 +409,20 @@ export default {
                 note: '',
             },
             outForm: {
-                id: '',
-                operateNumber:'',
-                materialInfoId: '',
                 goodsId: '',
-                category: '',
-                supplier: '',
-                number: '',
-                location: '',
-                producedDate: '',
-                status: 1,
+                categoryId:'',
+                category:'',
+                materialInfoId:'',
+                supplier:'',
+                operateNumber: '',
                 note: '',
             },
             rules: {
                 goodsId: [
                     {required: true, message: '请输入货号'}
+                ],
+                categoryId:[
+                    {required: true, message: '请选择品类'}
                 ],
                 materialInfo:[
                     {required: true, message: '请选择货品'}
@@ -451,13 +434,13 @@ export default {
                     {required: true, message: '请输入供货商名'}
                 ],
                 number: [
-                    {required: true, message: '请输入供货商名'}
+                    {required: true, message: '请输入数量'}
+                ],
+                operateNumber: [
+                    {required: true, message: '请输入操作数量'}
                 ],
                 price: [
-                    {required: true, message: '请输入供货商名'}
-                ],
-                totalAmount: [
-                    {required: true, message: '请输入供货商名'}
+                    {required: true, message: '请输入价格'}
                 ],
             },
             pickerOptions: {
@@ -483,7 +466,7 @@ export default {
         }
     },
     methods: {
-        //新增客户提交表单
+        //新增货品提交表单
         submitForAdd() {
             this.$refs.addForm.validate((isValid) => {
                 if (isValid) {
@@ -502,17 +485,17 @@ export default {
                 }
             })
         },
-        //编辑客户提交表单
-        submitForEdit() {
-            this.$refs.editForm.validate((isValid) => {
+        //编辑货品提交表单
+        submitForEditGoods() {
+            this.$refs.editGoodsForm.validate((isValid) => {
                 if (isValid) {
-                    http.put(`/goods`, this.editForm).then(({data}) => {
+                    http.put(`/goods`, this.editGoodsForm).then(({data}) => {
                         console.log(data)
                         if (!data.code) {
-                            this.handleCloseForEdit()
+                            this.handleCloseForEditGoods()
                             this.$message.success(data.message)
                         } else {
-                            this.handleCloseForEdit()
+                            this.handleCloseForEditGoods()
                             this.$message.error(data.message)
                         }
                     }).finally(() => {
@@ -550,15 +533,20 @@ export default {
             this.addDialogVisible = true
         },
         //编辑按钮点击事件
-        handleEdit(index, row) {
-            this.editDialogVisible = true
+        handleEdit4Goods(index, row) {
+            this.editGoodsDialogVisible = true
             //深拷贝 否则会直接修改数据
-            this.editForm = JSON.parse(JSON.stringify(row))
-            this.$set(this.editForm, 'materialInfo', row.category+"-"+row.supplier)
+            this.editGoodsForm = JSON.parse(JSON.stringify(row))
+            this.$set(this.editGoodsForm, 'materialInfo', row.category+"-"+row.supplier)
         },
+        //出库按钮点击事件
         handleOut(index, row){
             this.outDialogVisible = true
-            this.outForm = JSON.parse(JSON.stringify(row))
+            this.$set(this.outForm,"goodsId",row.goodsId)
+            this.$set(this.outForm,"categoryId",row.categoryId)
+            this.$set(this.outForm,"category",row.category)
+            this.$set(this.outForm,"materialInfoId",row.materialInfoId)
+            this.$set(this.outForm,"supplier",row.supplier)
         },
         //录入弹窗关闭
         handleCloseForAdd() {
@@ -566,24 +554,23 @@ export default {
             this.addDialogVisible = false
         },
         //编辑弹窗关闭
-        handleCloseForEdit() {
-            this.$refs.editForm.resetFields()
-            this.editDialogVisible = false
+        handleCloseForEditGoods() {
+            this.$refs.editGoodsForm.resetFields()
+            this.editGoodsDialogVisible = false
         },
         //采购弹窗关闭
         handleCloseForOut() {
             this.$refs.outForm.resetFields()
             this.outDialogVisible = false
         },
-        //删除按钮点击事件
-        handleDelete(index, row) {
-            console.log(index, row);
-            this.$confirm('此操作将永久删除该条目, 是否继续?', '提示', {
+        //删除货品按钮点击事件
+        handleDelete4Goods(index, row) {
+            this.$confirm('此操作将删除该条目, 并记录您的行为，您可以在删除后为该操作添加记录说明，是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                http.delete(`/materials/${row.id}`).then(({data}) => {
+                http.delete(`/goods/${row.id}`).then(({data}) => {
                     if (!data.code) {
                         this.$message.success(data.message)
                     } else {
@@ -634,7 +621,7 @@ export default {
         },
         //弹出客户选择选项
         selectMaterialClick() {
-            http.get("/materials").then(({data}) => {
+            http.get("/materials/overviews").then(({data}) => {
                 if (!data.code) {
                     this.options4Materials = data.data
                 } else {
@@ -643,13 +630,11 @@ export default {
             })
         },
         //选择客户后自动填充
-        selectMaterialChange(materialInfoId) {
+        selectMaterialChange(categoryId) {
             let materialData = {}
-            materialData = this.options4Materials.find(item => item.id === materialInfoId)
-            this.$set(this.addForm,'materialInfoId',materialData.materialInfoId)
+            materialData = this.options4Materials.find(item => item.id === categoryId)
+            this.$set(this.addForm,'categoryId',materialData.id)
             this.$set(this.addForm,'category',materialData.category)
-            this.$set(this.addForm,'supplier',materialData.supplier)
-            this.$set(this.addForm,'materialInfo', materialData.category + '-' + materialData.supplier)
         },
     },
     computed: {

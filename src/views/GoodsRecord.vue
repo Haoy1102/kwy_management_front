@@ -53,10 +53,25 @@
                 :data="tableData"
                 style="width: 100%"
             >
+                <el-table-column type="expand">
+                    <template slot-scope="props">
+                        <el-form label-position="left" class="demo-table-expand">
+                            <el-form-item label="仓储 ">
+                                <span>{{ props.row.location }}</span>
+                            </el-form-item>
+                            <el-form-item label="生产日期 ">
+                                <span>{{ props.row.producedDate }}</span>
+                            </el-form-item>
+                            <el-form-item label="操作时间 ">
+                                <span>{{ props.row.createTime }}</span>
+                            </el-form-item>
+                        </el-form>
+                    </template>
+                </el-table-column>
                 <el-table-column
                     width="100"
                     prop="id"
-                    label="操作记录ID">
+                    label="ID">
                 </el-table-column>
                 <el-table-column
                     prop="goodsId"
@@ -79,21 +94,16 @@
                     </template>
                 </el-table-column>
                 <el-table-column
+                    prop="originNumber"
+                    label="原量">
+                </el-table-column>
+                <el-table-column
                     prop="operateNumber"
                     label="操作数量">
                 </el-table-column>
                 <el-table-column
                     prop="remainNumber"
-                    label="本批余量">
-                </el-table-column>
-                <el-table-column
-                    width="180"
-                    prop="updateTime"
-                    label="操作时间">
-                </el-table-column>
-                <el-table-column
-                    prop="location"
-                    label="仓储">
+                    label="余量">
                 </el-table-column>
                 <el-table-column
                     label="状态">
@@ -104,13 +114,16 @@
                     </template>
                 </el-table-column>
                 <el-table-column
+                    prop="createUser"
+                    label="操作人">
+                </el-table-column>
+                <el-table-column
                     prop="note"
                     label="备注">
                 </el-table-column>
                 <el-table-column
-                    width="150"
-                    label="操作"
-                    >
+                    width="80"
+                    label="操作">
                     <template slot-scope="scope">
                         <el-button
                             size="mini"
@@ -158,9 +171,11 @@ export default {
                 note: '',
             },
             operateTypeLabels: {
-                1: {type: 'success', label: '入库'},
+                1: {type: 'success', label: '采购'},
                 2: {type: 'primary', label: '出库'},
                 3: {type: 'info', label: '手工录入'},
+                4: {type: 'info', label: '手动调整'},
+                5: {type: 'danger', label: '删除'},
             },
             rules: {
                 category: [
@@ -218,7 +233,7 @@ export default {
         },
         //获取页面
         getPage() {
-            http.get(`/goods/records/${this.pageData.currentPage}/${this.pageData.pageSize}/?id=${this.pageData.id}&goodsId=${this.pageData.goodsId}&category=${this.pageData.category}&supplier=${this.pageData.supplier}`).then(({data}) => {
+            http.get(`/goods/records/${this.pageData.currentPage}/${this.pageData.pageSize}/?id=${this.pageData.id}&category=${this.pageData.category}&supplier=${this.pageData.supplier}`).then(({data}) => {
                     if (!data.code) {
                         this.tableData = data.data.records
                         this.pageData.total = data.data.total
@@ -267,19 +282,11 @@ export default {
         position: relative;
         height: calc(100% - 62px);
 
-        .demo-table-expand {
-            font-size: 0;
-        }
-
-        .demo-table-expand label {
-            width: 90px;
-            color: #99a9bf;
-        }
-
         .demo-table-expand .el-form-item {
-            margin-right: 0;
+            margin-left: 5%;
+            margin-right: 5%;
             margin-bottom: 0;
-            width: 50%;
+            width: 90%;
         }
 
         .pager {

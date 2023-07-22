@@ -7,7 +7,7 @@ import Customer from "@/views/Customer.vue";
 import Order from "@/views/Order.vue";
 import MaterialOverview from "@/views/MaterialOverview.vue";
 import MaterialInfo from "@/views/MaterialInfo.vue";
-import Purchase from "@/views/Purchase.vue"
+import Purchase from "@/views/PurchaseRecord.vue"
 import GoodsManagement from "@/views/GoodsManagement.vue";
 import GoodsRecord from "@/views/GoodsRecord.vue";
 import EmployeeManagement from "@/views/EmployeeManagement.vue";

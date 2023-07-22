@@ -63,7 +63,7 @@
             >
                 <el-table-column type="expand">
                     <template slot-scope="props">
-                        <el-form label-position="left" inline class="demo-table-expand">
+                        <el-form label-position="left" class="demo-table-expand">
                             <el-form-item label="去向客户">
                                 <span>{{ props.row.customer }}</span>
                             </el-form-item>
@@ -95,7 +95,8 @@
                 </el-table-column>
                 <el-table-column
                     prop="productName"
-                    label="产品名称">
+                    label="产品名称"
+                    width="150">
                 </el-table-column>
                 <el-table-column
                     prop="productCode"
@@ -509,14 +510,14 @@ export default {
         position: relative;
         height: calc(100% - 62px);
 
-        .demo-table-expand {
-            font-size: 0;
-        }
-
-        .demo-table-expand label {
-            width: 90px;
-            color: #99a9bf;
-        }
+        //.demo-table-expand {
+        //    font-size: 0;
+        //}
+        //
+        //.demo-table-expand label {
+        //    width: 90px;
+        //    color: #99a9bf;
+        //}
 
         .demo-table-expand .el-form-item {
             margin-left: 5%;

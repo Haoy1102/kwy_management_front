@@ -23,6 +23,8 @@
             </el-menu-item-group>
         </el-submenu>
 
+        <h3 class="fixed-bottom">Beta-v1.0</h3>
+
 
     </el-menu>
 
@@ -33,6 +35,7 @@
 .el-menu-vertical-demo:not(.el-menu--collapse) {
     width: 200px;
     min-height: 400px;
+    position: relative;
 }
 
 .el-menu {
@@ -44,6 +47,19 @@
         line-height: 48px;
         font-size: 16px;
         font-weight: 400;
+    }
+
+    .fixed-bottom {
+        font-size: 14px;
+        position: absolute;
+        bottom: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #545c64;
+        color: rgb(204, 204, 204);
+        padding: 10px;
+        text-align: center;
+        width: 50%;
     }
 }
 </style>
@@ -133,12 +149,20 @@ export default {
                             index:1
                         },
                         {
+                            path: '/goods_management',
+                            name: 'goods_management',
+                            label: '库存管理',
+                            icon: 'box',
+                            url: 'GoodsManagement.vue',
+                            index:2
+                        },
+                        {
                             path: '/material_info',
                             name: 'material_info',
-                            label: '原料管理',
+                            label: '采购管理',
                             icon: 'info',
                             url: 'MaterialInfo.vue',
-                            index:2
+                            index:3
                         },
                         {
                             path: '/purchase',
@@ -146,14 +170,6 @@ export default {
                             label: '采购记录',
                             icon: 'shopping-cart-2',
                             url: 'Purchase.vue',
-                            index:3
-                        },
-                        {
-                            path: '/goods_management',
-                            name: 'goods_management',
-                            label: '库存管理',
-                            icon: 'box',
-                            url: 'GoodsManagement.vue',
                             index:4
                         },
                         {

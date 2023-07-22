@@ -34,9 +34,6 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <!--                    <el-form-item label="订单内容" prop="content">-->
-                    <!--                        <el-input type="textarea" placeholder="请输入订单内容" v-model="addForm.content"></el-input>-->
-                    <!--                    </el-form-item>-->
                     <el-form-item label="联系人" prop="people">
                         <el-input placeholder="请输入联系人名称" v-model="addForm.people"></el-input>
                     </el-form-item>
@@ -170,9 +167,6 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="订单内容" prop="content">
-                    <el-input type="textarea" placeholder="请输入订单内容" v-model="editForm.content"></el-input>
-                </el-form-item>
                 <el-form-item label="联系人" prop="people">
                     <el-input placeholder="请输入联系人名称" v-model="editForm.people"></el-input>
                 </el-form-item>
@@ -212,6 +206,7 @@
                 </el-form-item>
                 <el-form-item label="交付进度" prop="deliveryProgress">
                     <el-input-number
+                        disabled
                         placeholder="0-100"
                         v-model.number="editForm.deliveryProgress"
                         size="small">
@@ -236,31 +231,37 @@
         <el-dialog
             :visible.sync="editPaymentDialogVisible"
             :before-close="handleCloseForEditPayment">
-            <el-table
-                stripe
-                height="90%"
-                :data="curPaymentDetail"
-                style="width: 100%">
-                <el-table-column
-                    prop="payDate"
-                    label="回款日期">
-                </el-table-column>
-                <el-table-column
-                    prop="amount"
-                    label="回款金额">
-                </el-table-column>
-                <el-table-column
-                    width="150"
-                    label="操作">
-                    <template slot-scope="scope">
-                        <el-button
-                            size="mini"
-                            type="danger"
-                            @click="handleDelete4Payment(scope.$index, scope.row)">删除
-                        </el-button>
-                    </template>
-                </el-table-column>
-            </el-table>
+            <div style="height: 350px;">
+                <el-table
+                    stripe
+                    height="90%"
+                    :data="curPaymentDetail"
+                    style="width: 100%">
+                    <el-table-column
+                        prop="payDate"
+                        label="回款日期">
+                    </el-table-column>
+                    <el-table-column
+                        prop="amount"
+                        label="回款金额">
+                    </el-table-column>
+                    <el-table-column
+                        prop="note"
+                        label="备注">
+                    </el-table-column>
+                    <el-table-column
+                        width="150"
+                        label="操作">
+                        <template slot-scope="scope">
+                            <el-button
+                                size="mini"
+                                type="danger"
+                                @click="handleDelete4Payment(scope.$index, scope.row)">删除
+                            </el-button>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
             <span slot="footer" class="dialog-footer" style="display: flex; justify-content: center;">
                 <el-button type="primary" @click="handleAddPayment">添 加</el-button>
                 <el-button @click="handleCloseForEditPayment">取 消</el-button>
@@ -650,7 +651,7 @@
                                                 <span>{{ scope.column.label }}</span>
                                                 <el-tooltip class="header-tooltip"
                                                             effect="dark"
-                                                            :content="tooltipContent4Price"
+                                                            :content="tooltipContent4DeliverStatus"
                                                             placement="top">
                                                     <i class="el-icon-info"></i>
                                                 </el-tooltip>
@@ -738,9 +739,20 @@
                 <el-table-column
                     prop="deliveryProgress"
                     label="交付进度"
-                    width="80">
+                    width="90">
                     <template slot-scope="props">
                         {{ props.row.deliveryProgress }}%
+                    </template>
+                    <template slot="header" slot-scope="scope">
+                        <div class="column-header">
+                            <span>{{ scope.column.label }}</span>
+                            <el-tooltip class="header-tooltip"
+                                        effect="dark"
+                                        :content="tooltipContent4DeliverProgress"
+                                        placement="top">
+                                <i class="el-icon-info"></i>
+                            </el-tooltip>
+                        </div>
                     </template>
                 </el-table-column>
                 <el-table-column
@@ -813,7 +825,8 @@ export default {
             percentage: 0,
             selectedItems4OrderDetails: [], // 存储选中的项
             orderDetailTableData: [],
-            tooltipContent4Price:"如需退货，建议在下方订单内容处备注，并修改单价为0，金额为0。(请自行选择是否移步至产品管理界面手动添加数量，以供二次售卖。)",
+            tooltipContent4DeliverStatus: "如需退货，建议在下方订单内容处备注，并修改单价为0，金额为0。(请自行选择是否移步至产品管理界面手动添加数量，以供二次售卖。)",
+            tooltipContent4DeliverProgress: "计算公式：已出货产品金额 / 订单金额",
             options4Customer: [],
             options4Product: [],
             options4Status: [
@@ -1558,15 +1571,6 @@ export default {
         position: relative;
         height: calc(100% - 62px);
 
-        .demo-table-expand {
-            font-size: 0;
-        }
-
-        .demo-table-expand label {
-            width: 90px;
-            color: #99a9bf;
-        }
-
         .demo-table-expand .el-form-item {
             margin-left: 5%;
             margin-right: 5%;
@@ -1581,16 +1585,6 @@ export default {
         }
     }
 
-    @media print {
-        /* 打印样式规则 */
-        /* 隐藏不需要打印的元素 */
-        .no-print {
-            display: none;
-        }
-
-        /* 调整打印页面的布局和样式 */
-        /* 例如，设置合适的页面尺寸、页边距等 */
-    }
 
 }
 </style>

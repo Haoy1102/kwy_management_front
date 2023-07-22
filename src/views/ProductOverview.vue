@@ -219,10 +219,7 @@
                 <el-table-column type="expand">
                     <template slot-scope="props">
                         <el-form label-position="left" class="demo-table-expand">
-                            <el-form-item label="备注">
-                                <span>{{ props.row.note }}</span>
-                            </el-form-item>
-                            <el-form-item label="采购记录-(只显示最多十条，详细内容请至采购模块查询)">
+                            <el-form-item label="产品详情-(至多显示十条，详细内容请至产品管理模块查询)">
                                 <el-table
                                     :data="expandedRows[props.row.id]"
                                     style="width: 100%"
@@ -275,7 +272,8 @@
                 </el-table-column>
                 <el-table-column
                     prop="productName"
-                    label="产品名称">
+                    label="产品名称"
+                    width="150px">
                 </el-table-column>
                 <el-table-column
                     prop="productCode"
@@ -283,7 +281,8 @@
                 </el-table-column>
                 <el-table-column
                     prop="producedDateLast"
-                    label="最近生产">
+                    label="最近生产"
+                    width="110px">
                 </el-table-column>
                 <el-table-column
                     prop="numberPerBox"
@@ -306,7 +305,8 @@
                 </el-table-column>
                 <el-table-column
                     prop="unit"
-                    label="单位">
+                    label="单位"
+                    width="50px">
                 </el-table-column>
                 <el-table-column
                     prop="priceDefault"
@@ -590,7 +590,7 @@ export default {
         //删除按钮点击事件
         handleDelete(index, row) {
             console.log(index, row);
-            this.$confirm('此操作将永久删除该条目, 是否继续?', '提示', {
+            this.$confirm('产品数量为0才可执行删除操作, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -639,14 +639,6 @@ export default {
         handleExpandChange(row) {
             http.get(`/products/1/10/?productId=${row.id}`).then(({data}) => {
                 if (!data.code) {
-                    // data.data.records.forEach(record => {
-                    //     if (record.price !== null) {
-                    //         record.price = record.price.toFixed(2)
-                    //     }
-                    //     if (record.totalAmount !== null) {
-                    //         record.totalAmount = record.totalAmount.toFixed(2)
-                    //     }
-                    // })
                     this.$set(this.expandedRows, row.id, data.data.records)
                 }
             })
