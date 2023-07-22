@@ -554,7 +554,7 @@ export default {
         },
         //提交查看对账单请求
         submitForCheckBill() {
-            this.$confirm('此操作会生成Excel格式订单, 是否继续?', '提示', {
+            this.$confirm('此操作会生成Excel格式表单, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
@@ -587,8 +587,6 @@ export default {
             }).catch(() => {
                 this.$message.info('当前操作取消')
             })
-
-
         },
         //编辑客户提交表单
         submitForEdit() {

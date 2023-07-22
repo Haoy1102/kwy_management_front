@@ -539,13 +539,50 @@
             </span>
         </el-dialog>
 
-        <div class="manage-header">
-            <!--            <el-button @click="printTicket" type="primary">-->
-            <!--                打印-->
-            <!--            </el-button>-->
-            <el-button @click="handleAdd" type="primary">
-                + 新增订单
-            </el-button>
+        <el-dialog
+            title="导出采购单"
+            :visible.sync="purchaseDataDialogVisible"
+            width="30%"
+            :before-close="handleCloseForpurchaseData">
+            <el-form
+                ref="orderDataForm"
+                :model="orderDataForm"
+                :rules="rules"
+                label-width="auto">
+                <el-form-item label="起始日期" prop="startDate">
+                    <el-date-picker
+                        v-model="orderDataForm.startDate"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="截止日期" prop="endDate">
+                    <el-date-picker
+                        v-model="orderDataForm.endDate"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="handleCloseForpurchaseData">取 消</el-button>
+                <el-button type="primary" @click="submitForOrderData">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <div class="manage-header" style="text-align: right;">
+            <div>
+                <el-button @click="handleAdd" type="primary">
+                    + 新增订单
+                </el-button>
+                <el-button @click="handlePrint" type="success">
+                    导出记录
+                </el-button>
+            </div>
             <el-form :inline="true" :model="pageData">
                 <el-form-item>
                     <el-input placeholder="请输入订单号" v-model="pageData.orderId"></el-input>
@@ -817,6 +854,7 @@ export default {
             editOrderDetailDialogVisible: false,
             showResult4AddOrder: false,
             deliverDialogVisible: false,
+            purchaseDataDialogVisible:false,
             expandedRows: {},
             tableData: [],
             curTotalSelectNumber: 0,
@@ -877,6 +915,10 @@ export default {
                 deliveryProgress: '',
                 totalPayment: '',
                 note: "",
+            },
+            orderDataForm:{
+                startDate:'',
+                endDate:''
             },
             editForm: {
                 id: 0,
@@ -989,23 +1031,53 @@ export default {
                 ],
                 payDate: [
                     {required: true, message: '请选择回款日期'}
-                ]
+                ],
+                startDate: [
+                    {required: true, message: '请选择起始日期'}
+                ],
+                endDate: [
+                    {required: true, message: '请选择截止日期'}
+                ],
             },
             pickerOptions: {
-                disabledDate(time) {
-                    return time.getTime() > Date.now();
-                },
                 shortcuts: [
                     {
                         text: '今天',
                         onClick(picker) {
                             picker.$emit('pick', new Date());
                         }
-                    }, {
-                        text: '昨天',
+                    },
+                    {
+                        text: '本月初',
                         onClick(picker) {
                             const date = new Date();
-                            date.setTime(date.getTime() - 3600 * 1000 * 24);
+                            date.setDate(1);
+                            picker.$emit('pick', date);
+                        }
+                    },
+                    {
+                        text: '本月末',
+                        onClick(picker) {
+                            const date = new Date();
+                            const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                            picker.$emit('pick', lastDayOfMonth);
+                        }
+                    },
+                    {
+                        text: '本年初',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setMonth(0);
+                            date.setDate(1);
+                            picker.$emit('pick', date);
+                        }
+                    },
+                    {
+                        text: '本年末',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setMonth(11);
+                            date.setDate(31);
                             picker.$emit('pick', date);
                         }
                     }
@@ -1036,6 +1108,43 @@ export default {
                 //重新加载数据
                 loadingInstance.close();
                 this.getPage();
+            })
+        },
+        //提交导出订单记录请求
+        submitForOrderData() {
+            this.$confirm('此操作会导出订单记录和订单明细记录，生成Excel格式表单, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                console.log("进入")
+                // 获取选择的日期
+                let selectedDate = new Date(this.orderDataForm.endDate);
+                // 格式化日期为LocalDate格式
+                this.orderDataForm.endDate = selectedDate.toISOString().split('T')[0];
+                selectedDate = new Date(this.orderDataForm.startDate);
+                // 格式化日期为LocalDate格式
+                this.orderDataForm.startDate = selectedDate.toISOString().split('T')[0];
+
+                let loadingInstance = Loading.service({text: "正在处理中..."})
+                http.get(`/orders/printData/?startDate=${this.orderDataForm.startDate}&endDate=${this.orderDataForm.endDate}`
+                    , {responseType: 'blob'})
+                    .then(response => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `订单记录_${this.orderDataForm.startDate}_${this.orderDataForm.endDate}.xlsx`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }).finally(() => {
+                    loadingInstance.close();
+                })
+                    .catch(error => {
+                        console.error('Error downloading Excel file:', error);
+                    })
+            }).catch(() => {
+                this.$message.info('当前操作取消')
             })
         },
         //编辑提交表单
@@ -1154,6 +1263,10 @@ export default {
         handle4AddOrderDetail() {
             this.addOrderDetailDialogVisible = true;
         },
+        //导出按钮点击事件
+        handlePrint(){
+            this.purchaseDataDialogVisible = true
+        },
         //编辑按钮点击事件
         handleEdit(index, row) {
             this.editDialogVisible = true
@@ -1202,6 +1315,10 @@ export default {
             this.addDialogVisible = false
             this.activeStep = 0; // 关闭对话框时重置步骤为第一步
         },
+        //导出弹窗关闭
+        handleCloseForpurchaseData(){
+            this.purchaseDataDialogVisible=false;
+        },
         //编辑订单弹窗关闭
         handleCloseForEdit() {
             this.editDialogVisible = false
@@ -1224,6 +1341,7 @@ export default {
             this.$refs.orderDetailForm.resetFields()
             this.addOrderDetailDialogVisible = false
         },
+
         //管理明细弹窗关闭
         handleCloseForEditPayment() {
             this.editPaymentDialogVisible = false

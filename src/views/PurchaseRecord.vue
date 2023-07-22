@@ -1,5 +1,6 @@
 <template>
     <div class="manage">
+
         <el-dialog
             title="采购信息"
             :visible.sync="editDialogVisible"
@@ -26,7 +27,45 @@
             </span>
         </el-dialog>
 
+        <el-dialog
+            title="导出采购单"
+            :visible.sync="orderDataDialogVisible"
+            width="30%"
+            :before-close="handleCloseForOrderData">
+            <el-form
+                ref="purchaseDataForm"
+                :model="purchaseDataForm"
+                :rules="rules"
+                label-width="auto">
+                <el-form-item label="起始日期" prop="startDate">
+                    <el-date-picker
+                        v-model="purchaseDataForm.startDate"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="截止日期" prop="endDate">
+                    <el-date-picker
+                        v-model="purchaseDataForm.endDate"
+                        align="right"
+                        type="date"
+                        placeholder="选择日期"
+                        :picker-options="pickerOptions">
+                    </el-date-picker>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="handleCloseForOrderData">取 消</el-button>
+                <el-button type="primary" @click="submitForOrderData">确 定</el-button>
+            </span>
+        </el-dialog>
+
         <div class="manage-header">
+            <el-button @click="handlePrint" type="success">
+                导出记录
+            </el-button>
             <el-form :inline="true" :model="pageData">
                 <el-form-item>
                     <el-input placeholder="请输入操作ID" v-model="pageData.id"></el-input>
@@ -149,17 +188,23 @@
 
 <script>
 import http from "@/utils/request";
+import {Loading} from "element-ui";
 
 export default {
     name: "Purchase",
     data() {
         return {
             editDialogVisible: false,
+            orderDataDialogVisible:false,
             tableData: [],
             statusLabels: {
                 1: {type: 'success', label: '新鲜'},
                 2: {type: 'warning', label: '临期'},
                 3: {type: 'danger', label: '尽快使用'},
+            },
+            purchaseDataForm:{
+                startDate:'',
+                endDate:''
             },
             pageData: {
                 currentPage: 1,
@@ -190,6 +235,56 @@ export default {
                 totalAmount: [
                     {required: true, message: '请输入供货商名'}
                 ],
+                startDate: [
+                    {required: true, message: '请选择起始日期'}
+                ],
+                endDate: [
+                    {required: true, message: '请选择截止日期'}
+                ],
+            },
+            pickerOptions: {
+                shortcuts: [
+                    {
+                        text: '今天',
+                        onClick(picker) {
+                            picker.$emit('pick', new Date());
+                        }
+                    },
+                    {
+                        text: '本月初',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setDate(1);
+                            picker.$emit('pick', date);
+                        }
+                    },
+                    {
+                        text: '本月末',
+                        onClick(picker) {
+                            const date = new Date();
+                            const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                            picker.$emit('pick', lastDayOfMonth);
+                        }
+                    },
+                    {
+                        text: '本年初',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setMonth(0);
+                            date.setDate(1);
+                            picker.$emit('pick', date);
+                        }
+                    },
+                    {
+                        text: '本年末',
+                        onClick(picker) {
+                            const date = new Date();
+                            date.setMonth(11);
+                            date.setDate(31);
+                            picker.$emit('pick', date);
+                        }
+                    }
+                ]
             },
         }
     },
@@ -213,6 +308,43 @@ export default {
                 }
             })
         },
+        //提交导出采购记录请求
+        submitForOrderData() {
+            this.$confirm('此操作会生成Excel格式订单, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                console.log("进入")
+                // 获取选择的日期
+                let selectedDate = new Date(this.purchaseDataForm.endDate);
+                // 格式化日期为LocalDate格式
+                this.purchaseDataForm.endDate = selectedDate.toISOString().split('T')[0];
+                selectedDate = new Date(this.purchaseDataForm.startDate);
+                // 格式化日期为LocalDate格式
+                this.purchaseDataForm.startDate = selectedDate.toISOString().split('T')[0];
+
+                let loadingInstance = Loading.service({text: "正在处理中..."})
+                http.get(`/purchase/printData/?startDate=${this.purchaseDataForm.startDate}&endDate=${this.purchaseDataForm.endDate}`
+                    , {responseType: 'blob'})
+                    .then(response => {
+                        const url = window.URL.createObjectURL(new Blob([response.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `采购记录_${this.purchaseDataForm.startDate}_${this.purchaseDataForm.endDate}.xlsx`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }).finally(() => {
+                    loadingInstance.close();
+                })
+                    .catch(error => {
+                        console.error('Error downloading Excel file:', error);
+                    })
+            }).catch(() => {
+                this.$message.info('当前操作取消')
+            })
+        },
         //查询按钮点击事件
         searchSubmit() {
             this.getPage()
@@ -227,6 +359,14 @@ export default {
         handleCloseForEdit() {
             this.$refs.editForm.resetFields()
             this.editDialogVisible = false
+        },
+        //导出弹窗关闭
+        handleCloseForOrderData(){
+            this.orderDataDialogVisible=false;
+        },
+        //导出按钮点击事件
+        handlePrint(){
+            this.orderDataDialogVisible = true
         },
         //获取页面
         getPage() {
