@@ -5,13 +5,12 @@ module.exports = defineConfig({
     devServer: {
         proxy: {
             '/api': {
-                target: 'http://127.0.0.1:80',//后端接口地址
+                target: 'http://127.0.0.1:82',//后端接口地址
                 changeOrigin: true,//是否允许跨越
                 // pathRewrite: {
                 //     '^/api': '/api'//重写,
                 // }
             }
         }
-    }
-
+    },
 })
